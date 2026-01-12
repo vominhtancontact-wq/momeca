@@ -23,6 +23,7 @@ export interface Product {
   tags?: string[];
   unit?: string;
   isBestSeller?: boolean;
+  isHotDeal?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

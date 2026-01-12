@@ -104,10 +104,7 @@ export async function getBestSellers(limit = 15): Promise<PaginatedResponse<Prod
   return fetchApi<PaginatedResponse<Product>>(`/products/best-sellers?limit=${limit}`);
 }
 
-// Hot deals - get products with discount
+// Hot deals - get products marked as hot deal
 export async function getHotDeals(limit = 10): Promise<PaginatedResponse<Product>> {
-  const response = await fetchApi<PaginatedResponse<Product>>(`/products?limit=${limit}&sort=popular`);
-  // Filter products with discount
-  response.data = response.data.filter(p => p.discountPercent && p.discountPercent > 0);
-  return response;
+  return fetchApi<PaginatedResponse<Product>>(`/products/hot-deals?limit=${limit}`);
 }

@@ -23,6 +23,7 @@ export interface IProduct extends Document {
   tags?: string[];
   unit?: string;
   isBestSeller?: boolean;
+  isHotDeal?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -96,6 +97,10 @@ const ProductSchema = new Schema<IProduct>({
     default: 'kg'
   },
   isBestSeller: {
+    type: Boolean,
+    default: false
+  },
+  isHotDeal: {
     type: Boolean,
     default: false
   }

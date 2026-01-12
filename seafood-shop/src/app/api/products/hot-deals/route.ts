@@ -10,10 +10,10 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const limit = parseInt(searchParams.get('limit') || '15');
 
-    // Lấy sản phẩm được đánh dấu là bán chạy
-    const products = await Product.find({ isBestSeller: true })
+    // Lấy sản phẩm được đánh dấu là khuyến mãi hot
+    const products = await Product.find({ isHotDeal: true })
       .populate('category', 'name slug')
-      .sort({ soldCount: -1 })
+      .sort({ discountPercent: -1 })
       .limit(limit)
       .lean();
 
@@ -28,9 +28,9 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error('Error fetching best sellers:', error);
+    console.error('Error fetching hot deals:', error);
     return NextResponse.json(
-      { success: false, error: { message: 'Lỗi khi lấy sản phẩm bán chạy' } },
+      { success: false, error: { message: 'Lỗi khi lấy sản phẩm khuyến mãi' } },
       { status: 500 }
     );
   }
