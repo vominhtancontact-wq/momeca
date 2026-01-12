@@ -28,7 +28,7 @@ export default function SearchBar({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const router = useRouter();
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const debounceRef = useRef<NodeJS.Timeout>();
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   // Fetch suggestions khi query thay đổi
   useEffect(() => {
