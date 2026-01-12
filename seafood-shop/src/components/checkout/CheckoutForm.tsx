@@ -365,9 +365,9 @@ export default function CheckoutForm() {
           <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-100">
             <p className="text-sm font-medium text-blue-800 mb-2">Thông tin chuyển khoản:</p>
             <div className="text-sm text-blue-700 space-y-1">
-              <p>Ngân hàng: <span className="font-medium">Vietcombank</span></p>
-              <p>Số tài khoản: <span className="font-medium">1234567890</span></p>
-              <p>Chủ tài khoản: <span className="font-medium">MỠ MÊ CÁ</span></p>
+              <p>Ngân hàng: <span className="font-medium">TPBank</span></p>
+              <p>Số tài khoản: <span className="font-medium">29981722000</span></p>
+              <p>Chủ tài khoản: <span className="font-medium">VO THI THUY TIEN</span></p>
               <p className="text-xs mt-2 text-blue-600">Nội dung CK: [Số điện thoại] - [Họ tên]</p>
             </div>
           </div>
