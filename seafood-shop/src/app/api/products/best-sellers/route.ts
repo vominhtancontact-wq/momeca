@@ -10,8 +10,13 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const limit = parseInt(searchParams.get('limit') || '15');
 
-    // Lấy sản phẩm được đánh dấu là bán chạy
-    const products = await Product.find({ isBestSeller: true })
+    // Lấy sản phẩm bán chạy nhất (theo soldCount hoặc isBestSeller)
+    const products = await Product.find({
+      $or: [
+        { isBestSeller: true },
+        { soldCount: { $gt: 0 } }
+      ]
+    })
       .populate('category', 'name slug')
       .sort({ soldCount: -1 })
       .limit(limit)
