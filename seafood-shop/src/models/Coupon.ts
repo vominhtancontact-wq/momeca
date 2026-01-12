@@ -73,9 +73,8 @@ const CouponSchema = new Schema<ICoupon>({
   timestamps: true,
 });
 
-// Indexes
+// Indexes (code already has unique index from schema definition)
 CouponSchema.index({ userId: 1, status: 1 });
-CouponSchema.index({ code: 1 });
 CouponSchema.index({ expiresAt: 1 });
 
 // Generate unique coupon code
