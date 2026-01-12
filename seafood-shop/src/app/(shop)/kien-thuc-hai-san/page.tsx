@@ -98,8 +98,8 @@ export default function SeafoodKnowledgePage() {
               <div className="mt-8 p-4 bg-gradient-to-br from-primary/10 to-accent/10 rounded-xl">
                 <h4 className="font-bold text-gray-900 mb-2">Bạn cần tư vấn?</h4>
                 <p className="text-sm text-gray-600 mb-3">Liên hệ hotline để được hỗ trợ</p>
-                <a href="tel:1900xxxx" className="inline-flex items-center gap-2 text-primary font-bold">
-                  <span>📞</span> 1900 xxxx
+                <a href="tel:0899630279" className="inline-flex items-center gap-2 text-primary font-bold">
+                  <span>📞</span> 0899 630 279
                 </a>
               </div>
             </div>

@@ -240,8 +240,8 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
               </div>
               <div>
                 <p className="text-xs text-gray-500">Hotline đặt hàng</p>
-                <a href="tel:1900xxxx" className="text-lg font-bold text-primary">
-                  1900 xxxx
+                <a href="tel:0899630279" className="text-lg font-bold text-primary">
+                  0899 630 279
                 </a>
               </div>
             </div>

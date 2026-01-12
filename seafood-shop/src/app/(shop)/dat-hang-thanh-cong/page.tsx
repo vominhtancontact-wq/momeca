@@ -67,7 +67,7 @@ function OrderSuccessContent() {
         {/* Contact Info */}
         <div className="mt-8 p-4 bg-gray-50 rounded-lg text-sm text-gray-600">
           <p>Nếu có thắc mắc, vui lòng liên hệ:</p>
-          <p className="font-semibold text-primary mt-1">Hotline: 1900 xxxx</p>
+          <p className="font-semibold text-primary mt-1">Hotline: 0899 630 279</p>
         </div>
       </div>
     </div>
