@@ -2,6 +2,7 @@
 
 import { useRouter, useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import ImageUpload from '@/components/admin/ImageUpload';
 
 interface Category {
   _id: string;
@@ -123,17 +124,6 @@ export default function EditProductPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const addImage = () => {
-    setFormData((prev) => ({ ...prev, images: [...prev.images, ''] }));
-  };
-
-  const removeImage = (index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      images: prev.images.filter((_, i) => i !== index),
-    }));
   };
 
   const addVariant = () => {
@@ -260,61 +250,10 @@ export default function EditProductPage() {
         </div>
 
         {/* Images */}
-        <div>
-          <label className="block text-sm font-medium mb-2">Hình ảnh (URL)</label>
-          {formData.images.map((img, index) => (
-            <div key={index} className="mb-3">
-              <div className="flex gap-2 mb-2">
-                <input
-                  type="text"
-                  value={img}
-                  onChange={(e) => {
-                    const newImages = [...formData.images];
-                    newImages[index] = e.target.value;
-                    setFormData((prev) => ({ ...prev, images: newImages }));
-                  }}
-                  placeholder="https://example.com/image.jpg"
-                  className="flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-                {formData.images.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeImage(index)}
-                    className="px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg"
-                  >
-                    Xóa
-                  </button>
-                )}
-              </div>
-              {/* Preview ảnh */}
-              {img && img.trim() && (
-                <div className="ml-2 mb-2">
-                  <img 
-                    src={img} 
-                    alt={`Preview ${index + 1}`}
-                    className="w-24 h-24 object-cover rounded-lg border"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none';
-                    }}
-                    onLoad={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'block';
-                    }}
-                  />
-                </div>
-              )}
-            </div>
-          ))}
-          <button
-            type="button"
-            onClick={addImage}
-            className="text-primary hover:underline text-sm"
-          >
-            + Thêm hình ảnh
-          </button>
-          <p className="text-xs text-gray-500 mt-2">
-            💡 Dán URL ảnh đầy đủ (bắt đầu bằng https://). Ví dụ: https://images.unsplash.com/photo-xxx
-          </p>
-        </div>
+        <ImageUpload
+          images={formData.images}
+          onChange={(images) => setFormData((prev) => ({ ...prev, images }))}
+        />
 
         {/* Variants */}
         <div>
