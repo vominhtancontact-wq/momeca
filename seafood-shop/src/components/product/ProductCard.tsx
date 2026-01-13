@@ -14,19 +14,23 @@ interface ProductCardProps {
 export default function ProductCard({ product, showAddToCart = false }: ProductCardProps) {
   const hasDiscount = product.discountPercent && product.discountPercent > 0;
   const hasVariants = product.variants && product.variants.length > 1;
+  
+  // Kiểm tra ảnh hợp lệ (không rỗng và có URL)
+  const validImage = product.images && product.images.length > 0 && product.images[0] && product.images[0].trim() !== '';
 
   return (
     <div className="group bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden">
       <Link href={`/san-pham/${product.slug}`} className="block">
         {/* Image Container */}
         <div className="relative aspect-square overflow-hidden bg-gray-100">
-          {product.images && product.images.length > 0 ? (
+          {validImage ? (
             <Image
               src={product.images[0]}
               alt={product.name}
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-300"
               sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+              unoptimized
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-400">

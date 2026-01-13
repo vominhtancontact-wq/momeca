@@ -3,6 +3,10 @@ import dbConnect from '@/lib/db';
 import Product from '@/models/Product';
 import '@/models/Category'; // Required for populate
 
+// Tắt cache để luôn lấy data mới nhất
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET(request: NextRequest) {
   try {
     await dbConnect();
