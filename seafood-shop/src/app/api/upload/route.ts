@@ -1,15 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { v2 as cloudinary } from 'cloudinary';
-
-// Cấu hình Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
 
 export async function POST(request: NextRequest) {
   try {
+    const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+    const apiKey = process.env.CLOUDINARY_API_KEY;
+    const apiSecret = process.env.CLOUDINARY_API_SECRET;
+
+    if (!cloudName || !apiKey || !apiSecret) {
+      return NextResponse.json(
+        { success: false, error: 'Chưa cấu hình Cloudinary' },
+        { status: 500 }
+      );
+    }
+
     const formData = await request.formData();
     const file = formData.get('file') as File;
 
@@ -36,20 +39,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Convert file to base64
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    const base64 = `data:${file.type};base64,${buffer.toString('base64')}`;
+    // Tạo FormData để gửi lên Cloudinary
+    const uploadFormData = new FormData();
+    uploadFormData.append('file', file);
+    uploadFormData.append('upload_preset', 'ml_default');
+    uploadFormData.append('folder', 'seafood-shop/products');
 
-    // Upload lên Cloudinary
-    const result = await cloudinary.uploader.upload(base64, {
-      folder: 'seafood-shop/products',
-      transformation: [
-        { width: 800, height: 800, crop: 'limit' },
-        { quality: 'auto' },
-        { fetch_format: 'auto' }
-      ]
-    });
+    // Upload trực tiếp lên Cloudinary API
+    const uploadResponse = await fetch(
+      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+      {
+        method: 'POST',
+        body: uploadFormData,
+      }
+    );
+
+    const result = await uploadResponse.json();
+
+    if (!uploadResponse.ok) {
+      console.error('Cloudinary error:', result);
+      return NextResponse.json(
+        { success: false, error: result.error?.message || 'Lỗi upload Cloudinary' },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
@@ -58,10 +71,10 @@ export async function POST(request: NextRequest) {
         publicId: result.public_id,
       }
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error uploading image:', error);
     return NextResponse.json(
-      { success: false, error: 'Lỗi khi upload ảnh' },
+      { success: false, error: error.message || 'Lỗi khi upload ảnh' },
       { status: 500 }
     );
   }

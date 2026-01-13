@@ -80,7 +80,7 @@ export default function FloatingButtons() {
 
         {/* Messenger Button */}
         <a
-          href="https://m.me/momeca"
+          href="https://m.me/61586557799137"
           target="_blank"
           rel="noopener noreferrer"
           className="relative group animate-float animation-delay-400"
@@ -134,7 +134,7 @@ export default function FloatingButtons() {
 
           {/* Messenger Button */}
           <a
-            href="https://m.me/momeca"
+            href="https://m.me/61586557799137"
             target="_blank"
             rel="noopener noreferrer"
             className="flex flex-col items-center gap-1"
