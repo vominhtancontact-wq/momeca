@@ -1,33 +1,30 @@
-'use client';
-
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Product } from '@/types';
-import { getHotDeals } from '@/lib/api';
+import dbConnect from '@/lib/db';
+import Product from '@/models/Product';
+import '@/models/Category';
 import ProductGrid from '@/components/product/ProductGrid';
 
-export default function HotDeals() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+async function getHotDealsData(limit = 15) {
+  try {
+    await dbConnect();
+    const products = await Product.find({ isHotDeal: true })
+      .populate('category', 'name slug')
+      .sort({ discountPercent: -1 })
+      .limit(limit)
+      .lean();
+    
+    // Convert MongoDB documents to plain objects
+    return JSON.parse(JSON.stringify(products));
+  } catch (error) {
+    console.error('Error fetching hot deals:', error);
+    return [];
+  }
+}
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await getHotDeals(15);
-        if (response.success) {
-          setProducts(response.data);
-        }
-      } catch (error) {
-        console.error('Error fetching hot deals:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+export default async function HotDeals() {
+  const products = await getHotDealsData(15);
 
-    fetchProducts();
-  }, []);
-
-  if (!isLoading && products.length === 0) {
+  if (products.length === 0) {
     return null;
   }
 
@@ -50,7 +47,7 @@ export default function HotDeals() {
         {/* Products Grid */}
         <ProductGrid
           products={products}
-          isLoading={isLoading}
+          isLoading={false}
           emptyMessage="Chưa có sản phẩm khuyến mãi"
         />
       </div>

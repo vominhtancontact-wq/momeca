@@ -108,3 +108,20 @@ export async function getBestSellers(limit = 15): Promise<PaginatedResponse<Prod
 export async function getHotDeals(limit = 10): Promise<PaginatedResponse<Product>> {
   return fetchApi<PaginatedResponse<Product>>(`/products/hot-deals?limit=${limit}`);
 }
+
+// Server-side fetch functions với caching
+export async function getBestSellersServer(limit = 15): Promise<PaginatedResponse<Product>> {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  const response = await fetch(`${baseUrl}/api/products/best-sellers?limit=${limit}`, {
+    next: { revalidate: 60 } // Cache 60 giây
+  });
+  return response.json();
+}
+
+export async function getHotDealsServer(limit = 15): Promise<PaginatedResponse<Product>> {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  const response = await fetch(`${baseUrl}/api/products/hot-deals?limit=${limit}`, {
+    next: { revalidate: 60 } // Cache 60 giây
+  });
+  return response.json();
+}

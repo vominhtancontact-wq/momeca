@@ -3,6 +3,9 @@ import dbConnect from '@/lib/db';
 import Product from '@/models/Product';
 import '@/models/Category';
 
+// Revalidate cache mỗi 60 giây
+export const revalidate = 60;
+
 export async function GET(request: NextRequest) {
   try {
     await dbConnect();
@@ -17,7 +20,7 @@ export async function GET(request: NextRequest) {
       .limit(limit)
       .lean();
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       data: products,
       pagination: {
@@ -27,6 +30,11 @@ export async function GET(request: NextRequest) {
         totalPages: 1
       }
     });
+
+    // Cache response trong 60 giây
+    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120');
+
+    return response;
   } catch (error) {
     console.error('Error fetching hot deals:', error);
     return NextResponse.json(

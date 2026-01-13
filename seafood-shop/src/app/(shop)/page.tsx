@@ -1,16 +1,32 @@
 import { Metadata } from 'next';
+import { Suspense } from 'react';
 import HeroSection from '@/components/home/HeroSection';
 import BestSellers from '@/components/home/BestSellers';
 import PromoBanner from '@/components/home/PromoBanner';
 import HotDeals from '@/components/home/HotDeals';
 import FlashSale from '@/components/home/FlashSale';
 import SeafoodKnowledge from '@/components/home/SeafoodKnowledge';
+import { ProductGridSkeleton } from '@/components/ui/Skeleton';
 
 export const metadata: Metadata = {
   title: 'Mỡ Mê Cá - Chuyên cung cấp hải sản tươi sống và IQF',
   description: 'Mua hải sản tươi sống, IQF chất lượng cao. Cua, tôm, cá, ốc, mực... Giao hàng nhanh, giá tốt nhất thị trường.',
   keywords: 'hải sản, hải sản tươi, hải sản IQF, cua, tôm, cá, ốc, mực, mỡ mê cá',
 };
+
+// Loading component cho sections
+function SectionLoading({ title }: { title: string }) {
+  return (
+    <section className="py-8 md:py-12 bg-cream">
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl md:text-2xl font-bold text-gray-900">{title}</h2>
+        </div>
+        <ProductGridSkeleton count={5} />
+      </div>
+    </section>
+  );
+}
 
 export default function HomePage() {
   return (
@@ -22,13 +38,17 @@ export default function HomePage() {
       <FlashSale />
 
       {/* Best Sellers Section */}
-      <BestSellers />
+      <Suspense fallback={<SectionLoading title="🔥 Hải Sản Bán Chạy" />}>
+        <BestSellers />
+      </Suspense>
 
       {/* Promo Banner Slider */}
       <PromoBanner />
 
       {/* Hot Deals Section */}
-      <HotDeals />
+      <Suspense fallback={<SectionLoading title="🏷️ Khuyến Mãi Hot" />}>
+        <HotDeals />
+      </Suspense>
 
       {/* Seafood Knowledge Section */}
       <SeafoodKnowledge />

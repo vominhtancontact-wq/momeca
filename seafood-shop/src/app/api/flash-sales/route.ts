@@ -3,6 +3,9 @@ import dbConnect from '@/lib/db';
 import FlashSale from '@/models/FlashSale';
 import Product from '@/models/Product';
 
+// Revalidate cache mỗi 30 giây (flash sale cần cập nhật thường xuyên)
+export const revalidate = 30;
+
 export async function GET() {
   try {
     await dbConnect();
@@ -22,10 +25,15 @@ export async function GET() {
       .sort({ startTime: 1 })
       .lean();
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       data: flashSales
     });
+
+    // Cache response trong 30 giây
+    response.headers.set('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=60');
+
+    return response;
   } catch (error) {
     console.error('Error fetching flash sales:', error);
     return NextResponse.json(

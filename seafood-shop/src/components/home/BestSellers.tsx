@@ -1,31 +1,28 @@
-'use client';
-
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Product } from '@/types';
-import { getBestSellers } from '@/lib/api';
+import dbConnect from '@/lib/db';
+import Product from '@/models/Product';
+import '@/models/Category';
 import ProductGrid from '@/components/product/ProductGrid';
 
-export default function BestSellers() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+async function getBestSellersData(limit = 15) {
+  try {
+    await dbConnect();
+    const products = await Product.find({ isBestSeller: true })
+      .populate('category', 'name slug')
+      .sort({ soldCount: -1 })
+      .limit(limit)
+      .lean();
+    
+    // Convert MongoDB documents to plain objects
+    return JSON.parse(JSON.stringify(products));
+  } catch (error) {
+    console.error('Error fetching best sellers:', error);
+    return [];
+  }
+}
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await getBestSellers(15);
-        if (response.success) {
-          setProducts(response.data);
-        }
-      } catch (error) {
-        console.error('Error fetching best sellers:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, []);
+export default async function BestSellers() {
+  const products = await getBestSellersData(15);
 
   return (
     <section className="py-8 md:py-12 bg-cream">
@@ -46,7 +43,7 @@ export default function BestSellers() {
         {/* Products Grid */}
         <ProductGrid
           products={products}
-          isLoading={isLoading}
+          isLoading={false}
           emptyMessage="Chưa có sản phẩm bán chạy"
         />
       </div>

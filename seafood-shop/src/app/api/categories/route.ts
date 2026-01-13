@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Category from '@/models/Category';
 
+// Revalidate cache mỗi 5 phút (categories ít thay đổi)
+export const revalidate = 300;
+
 export async function GET() {
   try {
     await dbConnect();
@@ -10,10 +13,15 @@ export async function GET() {
       .sort({ order: 1, name: 1 })
       .lean();
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       data: categories
     });
+
+    // Cache response trong 5 phút
+    response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
+
+    return response;
   } catch (error) {
     console.error('Error fetching categories:', error);
     return NextResponse.json(
