@@ -4,6 +4,10 @@ import Product from '@/models/Product';
 import '@/models/Category';
 import ProductGrid from '@/components/product/ProductGrid';
 
+// Không cache - luôn lấy data mới nhất
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 async function getBestSellersData(limit = 15) {
   try {
     await dbConnect();
