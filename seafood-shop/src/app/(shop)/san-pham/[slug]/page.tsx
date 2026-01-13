@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import dbConnect from '@/lib/db';
 import Product from '@/models/Product';
+import '@/models/Category'; // Import để register schema
 import { Product as ProductType, Category } from '@/types';
 import ProductGallery from '@/components/product/ProductGallery';
 import ProductInfo from '@/components/product/ProductInfo';
