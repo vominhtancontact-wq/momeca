@@ -51,7 +51,9 @@ export default function HomePage() {
       </Suspense>
 
       {/* Seafood Knowledge Section */}
-      <SeafoodKnowledge />
+      <Suspense fallback={<SectionLoading title="📚 Kiến Thức Hải Sản" />}>
+        <SeafoodKnowledge />
+      </Suspense>
 
       {/* Features Section */}
       <section className="py-16 bg-cream">

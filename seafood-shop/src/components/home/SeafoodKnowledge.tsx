@@ -1,72 +1,39 @@
-'use client';
-
 import Link from 'next/link';
+import Image from 'next/image';
+import dbConnect from '@/lib/db';
+import Article from '@/models/Article';
 
-// Sample articles data - same as in the knowledge page
-const articles = [
-  {
-    id: 1,
-    title: 'Ốc Gai Nấu Gì Ngon? Mách Bạn 07 Cách Chế Biến Ốc Gai Ăn Là Ghiền',
-    excerpt: 'Nếu bạn chưa biết nên ốc gai nấu gì ngon sao cho vừa đơn giản, vừa nhanh gọn mà lại vừa ngon. Vẫn giữ được vị ngon tự nhiên của ốc gai...',
-    image: 'https://images.unsplash.com/photo-1615141982883-c7ad0e69fd62?w=600&h=400&fit=crop',
-    category: 'Công thức nấu ăn',
-    date: '15/01/2025',
-    featured: true
-  },
-  {
-    id: 2,
-    title: 'Sò Tai Tượng Nấu Súp | Món Ăn Dinh Dưỡng Ngon Tuyệt Cho Cả Gia Đình',
-    excerpt: 'Hướng dẫn cách nấu súp sò tai tượng thơm ngon, bổ dưỡng cho cả gia đình.',
-    image: 'https://images.unsplash.com/photo-1559737558-2f5a35f4523b?w=400&h=250&fit=crop',
-    category: 'Công thức nấu ăn',
-    date: '12/01/2025'
-  },
-  {
-    id: 3,
-    title: 'Tác Dụng Của Tôm Biển Là Gì? Bật Mí Điều Có Thể Bạn Chưa Biết',
-    excerpt: 'Khám phá những lợi ích sức khỏe tuyệt vời từ tôm biển mà bạn nên biết.',
-    image: 'https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?w=400&h=250&fit=crop',
-    category: 'Sức khỏe',
-    date: '10/01/2025'
-  },
-  {
-    id: 4,
-    title: 'Chi Tiết 5 Cách Làm Ốc Bươu Xào Thơm Ngon Độc Đáo Nhất',
-    excerpt: 'Tổng hợp 5 cách chế biến ốc bươu xào ngon nhất, dễ làm tại nhà.',
-    image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&h=250&fit=crop',
-    category: 'Công thức nấu ăn',
-    date: '08/01/2025'
-  },
-  {
-    id: 5,
-    title: 'Cách Ăn Hàu Sống Béo, Ngậy, Không Tanh Và Những Điều Cần Chú Ý',
-    excerpt: 'Bí quyết thưởng thức hàu sống đúng cách để có trải nghiệm tuyệt vời nhất.',
-    image: 'https://images.unsplash.com/photo-1510130387422-82bed34b37e9?w=400&h=250&fit=crop',
-    category: 'Mẹo hay',
-    date: '05/01/2025'
-  },
-  {
-    id: 6,
-    title: 'TOP 03 Tư Hải Hấp Thơm Ngon Càng Ăn Càng Mê',
-    excerpt: 'Khám phá 3 cách hấp tư hải thơm ngon, giữ trọn vị ngọt tự nhiên.',
-    image: 'https://images.unsplash.com/photo-1534604973900-c43ab4c2e0ab?w=400&h=250&fit=crop',
-    category: 'Công thức nấu ăn',
-    date: '02/01/2025'
-  },
-  {
-    id: 7,
-    title: 'Chi Tiết Công Thức Vẹm Xanh Nướng Mỡ Hành Đơn Giản Tại Nhà',
-    excerpt: 'Hướng dẫn chi tiết cách làm vẹm xanh nướng mỡ hành thơm lừng.',
-    image: 'https://images.unsplash.com/photo-1579631542720-3a87824fff86?w=400&h=250&fit=crop',
-    category: 'Công thức nấu ăn',
-    date: '01/01/2025'
+const categoryLabels: Record<string, string> = {
+  'kien-thuc': 'Kiến thức',
+  'cong-thuc': 'Công thức nấu ăn',
+  'tin-tuc': 'Tin tức',
+  'meo-hay': 'Mẹo hay',
+};
+
+async function getArticles() {
+  try {
+    await dbConnect();
+    const articles = await Article.find({ isPublished: true })
+      .sort({ createdAt: -1 })
+      .limit(7)
+      .lean();
+    return JSON.parse(JSON.stringify(articles));
+  } catch (error) {
+    console.error('Error fetching articles:', error);
+    return [];
   }
-];
+}
 
-export default function SeafoodKnowledge() {
-  const featuredArticle = articles.find(a => a.featured);
-  const sideArticles = articles.filter(a => !a.featured).slice(0, 4);
-  const rightArticles = articles.filter(a => !a.featured).slice(4, 6);
+export default async function SeafoodKnowledge() {
+  const articles = await getArticles();
+
+  if (articles.length === 0) {
+    return null;
+  }
+
+  const featuredArticle = articles[0];
+  const sideArticles = articles.slice(1, 5);
+  const rightArticles = articles.slice(5, 7);
 
   return (
     <section className="py-12 bg-cream">
@@ -98,16 +65,26 @@ export default function SeafoodKnowledge() {
           {/* Left Column - Featured Article */}
           <div className="lg:col-span-1">
             {featuredArticle && (
-              <Link href={`/kien-thuc-hai-san/${featuredArticle.id}`} className="group block">
+              <Link href={`/tin-tuc/${featuredArticle.slug}`} className="group block">
                 <article className="bg-white rounded-2xl shadow-lg overflow-hidden h-full">
-                  <div className="relative h-[280px] overflow-hidden">
-                    <img 
-                      src={featuredArticle.image} 
-                      alt={featuredArticle.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
+                  <div className="relative h-[280px] overflow-hidden bg-gray-100">
+                    {featuredArticle.thumbnail ? (
+                      <Image 
+                        src={featuredArticle.thumbnail} 
+                        alt={featuredArticle.title}
+                        fill
+                        className="object-cover group-hover:scale-110 transition-transform duration-500"
+                        unoptimized
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400">
+                        <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                        </svg>
+                      </div>
+                    )}
                     <span className="absolute top-4 left-4 bg-primary text-white text-xs px-3 py-1 rounded-full">
-                      {featuredArticle.category}
+                      {categoryLabels[featuredArticle.category] || featuredArticle.category}
                     </span>
                   </div>
                   <div className="p-5">
@@ -123,24 +100,36 @@ export default function SeafoodKnowledge() {
 
           {/* Middle Column - 4 small articles */}
           <div className="lg:col-span-1 space-y-4">
-            {sideArticles.map((article) => (
+            {sideArticles.map((article: any) => (
               <Link 
-                key={article.id} 
-                href={`/kien-thuc-hai-san/${article.id}`}
+                key={article._id} 
+                href={`/tin-tuc/${article.slug}`}
                 className="group flex gap-4 bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow"
               >
-                <div className="w-28 h-24 flex-shrink-0 overflow-hidden">
-                  <img 
-                    src={article.image} 
-                    alt={article.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
+                <div className="w-28 h-24 flex-shrink-0 overflow-hidden relative bg-gray-100">
+                  {article.thumbnail ? (
+                    <Image 
+                      src={article.thumbnail} 
+                      alt={article.title}
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-500"
+                      unoptimized
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                      </svg>
+                    </div>
+                  )}
                 </div>
                 <div className="flex-1 py-2 pr-3">
                   <h4 className="text-sm font-semibold text-gray-900 group-hover:text-primary transition-colors line-clamp-2">
                     {article.title}
                   </h4>
-                  <p className="text-xs text-gray-400 mt-1">{article.date}</p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    {new Date(article.createdAt).toLocaleDateString('vi-VN')}
+                  </p>
                 </div>
               </Link>
             ))}
@@ -148,24 +137,36 @@ export default function SeafoodKnowledge() {
 
           {/* Right Column - 2 medium articles */}
           <div className="lg:col-span-1 space-y-4">
-            {rightArticles.map((article) => (
+            {rightArticles.map((article: any) => (
               <Link 
-                key={article.id} 
-                href={`/kien-thuc-hai-san/${article.id}`}
+                key={article._id} 
+                href={`/tin-tuc/${article.slug}`}
                 className="group block bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow"
               >
-                <div className="relative h-36 overflow-hidden">
-                  <img 
-                    src={article.image} 
-                    alt={article.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
+                <div className="relative h-36 overflow-hidden bg-gray-100">
+                  {article.thumbnail ? (
+                    <Image 
+                      src={article.thumbnail} 
+                      alt={article.title}
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-500"
+                      unoptimized
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                      <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                      </svg>
+                    </div>
+                  )}
                 </div>
                 <div className="p-4">
                   <h4 className="text-sm font-semibold text-gray-900 group-hover:text-primary transition-colors line-clamp-2">
                     {article.title}
                   </h4>
-                  <p className="text-xs text-gray-400 mt-1">{article.date}</p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    {new Date(article.createdAt).toLocaleDateString('vi-VN')}
+                  </p>
                 </div>
               </Link>
             ))}
