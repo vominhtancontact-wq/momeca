@@ -66,7 +66,7 @@ export default function EditProductPage() {
             price: String(product.price || ''),
             originalPrice: String(product.originalPrice || ''),
             category: product.category?._id || product.category || '',
-            stock: String(product.stock || ''),
+            stock: String(product.stock || 999),
             unit: product.unit || 'kg',
             images: product.images?.length ? product.images : [''],
             variants: product.variants?.length
@@ -91,17 +91,21 @@ export default function EditProductPage() {
     setLoading(true);
 
     try {
+      const price = Number(formData.price);
+      const originalPriceValue = formData.originalPrice ? Number(formData.originalPrice) : null;
+      
       const payload = {
         ...formData,
-        price: Number(formData.price),
-        originalPrice: Number(formData.originalPrice) || Number(formData.price),
+        price,
+        // Chỉ set originalPrice khi có giá trị và lớn hơn giá bán (có giảm giá)
+        originalPrice: originalPriceValue && originalPriceValue > price ? originalPriceValue : undefined,
         stock: Number(formData.stock),
         images: formData.images.filter((img) => img.trim()),
         variants: formData.variants
           .filter((v) => v.name.trim())
           .map((v) => ({
             name: v.name,
-            price: Number(v.price) || Number(formData.price),
+            price: Number(v.price) || price,
             stock: Number(v.stock) || Number(formData.stock),
           })),
       };
@@ -185,7 +189,7 @@ export default function EditProductPage() {
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <label className="block text-sm font-medium mb-2">Giá bán *</label>
             <input
@@ -198,22 +202,13 @@ export default function EditProductPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Giá gốc</label>
+            <label className="block text-sm font-medium mb-2">Giá gốc (để trống nếu không giảm giá)</label>
             <input
               type="number"
               value={formData.originalPrice}
               onChange={(e) => setFormData((prev) => ({ ...prev, originalPrice: e.target.value }))}
               min="0"
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-2">Tồn kho</label>
-            <input
-              type="number"
-              value={formData.stock}
-              onChange={(e) => setFormData((prev) => ({ ...prev, stock: e.target.value }))}
-              min="0"
+              placeholder="Để trống = không giảm giá"
               className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
             />
           </div>

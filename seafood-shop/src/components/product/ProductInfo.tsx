@@ -82,7 +82,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
         <span className="text-3xl font-bold text-error">
           {formatPrice(currentPrice)}
         </span>
-        {hasDiscount && originalPrice && (
+        {hasDiscount && originalPrice && originalPrice > currentPrice && (
           <>
             <span className="text-lg text-gray-400 line-through">
               {formatPrice(originalPrice)}

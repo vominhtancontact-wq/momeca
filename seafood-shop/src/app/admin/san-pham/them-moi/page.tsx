@@ -20,10 +20,10 @@ export default function AddProductPage() {
     price: '',
     originalPrice: '',
     category: '',
-    stock: '100',
+    stock: '999',
     unit: 'kg',
     images: [''],
-    variants: [{ name: '', price: '', stock: '' }],
+    variants: [{ name: '', price: '', stock: '999' }],
     isActive: true,
     isBestSeller: false,
     isHotDeal: false,
@@ -64,17 +64,21 @@ export default function AddProductPage() {
     setLoading(true);
 
     try {
+      const price = Number(formData.price);
+      const originalPriceValue = formData.originalPrice ? Number(formData.originalPrice) : null;
+      
       const payload = {
         ...formData,
-        price: Number(formData.price),
-        originalPrice: Number(formData.originalPrice) || Number(formData.price),
+        price,
+        // Chỉ set originalPrice khi có giá trị và lớn hơn giá bán (có giảm giá)
+        originalPrice: originalPriceValue && originalPriceValue > price ? originalPriceValue : undefined,
         stock: Number(formData.stock),
         images: formData.images.filter((img) => img.trim()),
         variants: formData.variants
           .filter((v) => v.name.trim())
           .map((v) => ({
             name: v.name,
-            price: Number(v.price) || Number(formData.price),
+            price: Number(v.price) || price,
             stock: Number(v.stock) || Number(formData.stock),
           })),
       };
@@ -150,7 +154,7 @@ export default function AddProductPage() {
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <label className="block text-sm font-medium mb-2">Giá bán *</label>
             <input
@@ -163,22 +167,13 @@ export default function AddProductPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Giá gốc</label>
+            <label className="block text-sm font-medium mb-2">Giá gốc (để trống nếu không giảm giá)</label>
             <input
               type="number"
               value={formData.originalPrice}
               onChange={(e) => setFormData((prev) => ({ ...prev, originalPrice: e.target.value }))}
               min="0"
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-2">Tồn kho</label>
-            <input
-              type="number"
-              value={formData.stock}
-              onChange={(e) => setFormData((prev) => ({ ...prev, stock: e.target.value }))}
-              min="0"
+              placeholder="Để trống = không giảm giá"
               className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
             />
           </div>

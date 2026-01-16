@@ -64,8 +64,7 @@ const ProductSchema = new Schema<IProduct>({
     min: [0, 'Giá gốc không được âm']
   },
   discountPercent: { 
-    type: Number, 
-    default: 0,
+    type: Number,
     min: [0, 'Phần trăm giảm giá không được âm'],
     max: [100, 'Phần trăm giảm giá không được quá 100']
   },
@@ -126,6 +125,9 @@ ProductSchema.virtual('hasDiscount').get(function() {
 ProductSchema.pre('save', function(next) {
   if (this.originalPrice && this.originalPrice > this.price) {
     this.discountPercent = Math.round(((this.originalPrice - this.price) / this.originalPrice) * 100);
+  } else {
+    // Reset discountPercent when no discount
+    this.discountPercent = undefined;
   }
   next();
 });
