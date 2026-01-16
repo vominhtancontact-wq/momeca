@@ -49,11 +49,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     
     console.log('Updating product with body:', JSON.stringify(body, null, 2));
 
-    const product = await Product.findByIdAndUpdate(
-      id,
-      body,
-      { new: true, runValidators: true }
-    ).populate('category', 'name slug');
+    // Dùng findById + save để trigger pre-save middleware (tính discountPercent)
+    const product = await Product.findById(id);
 
     if (!product) {
       return NextResponse.json(
@@ -61,8 +58,26 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         { status: 404 }
       );
     }
+
+    // Cập nhật các field
+    Object.keys(body).forEach(key => {
+      if (body[key] !== undefined) {
+        (product as any)[key] = body[key];
+      }
+    });
+
+    // Xử lý originalPrice - nếu không có hoặc <= price thì xóa
+    if (!body.originalPrice || body.originalPrice <= body.price) {
+      product.originalPrice = undefined;
+      product.discountPercent = undefined;
+    }
+
+    await product.save();
     
-    console.log('Updated product isBestSeller:', product.isBestSeller);
+    // Populate category sau khi save
+    await product.populate('category', 'name slug');
+    
+    console.log('Updated product:', product.name, 'price:', product.price);
 
     return NextResponse.json({
       success: true,
