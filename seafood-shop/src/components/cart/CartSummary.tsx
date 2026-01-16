@@ -9,9 +9,16 @@ const FREE_SHIPPING_THRESHOLD = 500000;
 const SHIPPING_FEE = 40000;
 
 export default function CartSummary() {
-  const { getTotalItems, getTotalAmount } = useCartStore();
-  const totalItems = getTotalItems();
-  const subtotal = getTotalAmount();
+  // Subscribe trực tiếp vào items để component re-render khi items thay đổi
+  const items = useCartStore((state) => state.items);
+  
+  // Tính toán trực tiếp từ items
+  const totalItems = items.reduce((total, item) => total + item.quantity, 0);
+  const subtotal = items.reduce((total, item) => {
+    const price = item.variant?.price ?? item.product.price;
+    return total + price * item.quantity;
+  }, 0);
+  
   const shippingFee = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
   const totalAmount = subtotal + shippingFee;
   const amountToFreeShipping = FREE_SHIPPING_THRESHOLD - subtotal;

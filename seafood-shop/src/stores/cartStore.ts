@@ -67,6 +67,14 @@ export const useCartStore = create<CartStore>()(
       currentUserId: null,
 
       addItem: (product: Product, variant?: ProductVariant, quantity = 1) => {
+        const state = get();
+        
+        // Chặn nếu chưa đăng nhập (currentUserId = null)
+        if (!state.currentUserId) {
+          console.warn('User must be logged in to add items to cart');
+          return;
+        }
+        
         set((state) => {
           const existingIndex = state.items.findIndex(
             (item) =>
