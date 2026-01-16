@@ -74,13 +74,21 @@ export async function GET(request: NextRequest) {
     const dateParam = searchParams.get('date');
     const date = dateParam ? new Date(dateParam) : new Date();
 
+    // Validate date
+    if (isNaN(date.getTime())) {
+      return NextResponse.json(
+        { error: 'Ngày không hợp lệ' },
+        { status: 400 }
+      );
+    }
+
     const { start, end } = getDateRange(period, date);
     const { start: prevStart, end: prevEnd } = getPreviousDateRange(period, date);
 
     // Current period stats
     const currentOrders = await Order.find({
       createdAt: { $gte: start, $lte: end }
-    }).lean();
+    }).lean() || [];
 
     const completedOrders = currentOrders.filter(
       o => o.status === 'delivered'
@@ -98,7 +106,7 @@ export async function GET(request: NextRequest) {
     // Previous period stats for comparison
     const prevOrders = await Order.find({
       createdAt: { $gte: prevStart, $lte: prevEnd }
-    }).lean();
+    }).lean() || [];
 
     const prevCompletedOrders = prevOrders.filter(
       o => o.status === 'delivered'
@@ -124,12 +132,12 @@ export async function GET(request: NextRequest) {
     const newCustomers = await User.countDocuments({
       role: { $ne: 'admin' },
       createdAt: { $gte: start, $lte: end }
-    });
+    }) || 0;
 
     const prevNewCustomers = await User.countDocuments({
       role: { $ne: 'admin' },
       createdAt: { $gte: prevStart, $lte: prevEnd }
-    });
+    }) || 0;
 
     const customerGrowth = prevNewCustomers > 0
       ? ((newCustomers - prevNewCustomers) / prevNewCustomers) * 100
@@ -139,14 +147,16 @@ export async function GET(request: NextRequest) {
     const productSales: Record<string, { name: string; quantity: number; revenue: number }> = {};
     
     completedOrders.forEach(order => {
-      order.items?.forEach(item => {
-        const key = item.productName;
-        if (!productSales[key]) {
-          productSales[key] = { name: item.productName, quantity: 0, revenue: 0 };
-        }
-        productSales[key].quantity += item.quantity;
-        productSales[key].revenue += item.price * item.quantity;
-      });
+      if (order.items && Array.isArray(order.items)) {
+        order.items.forEach(item => {
+          const key = item.productName || 'Unknown';
+          if (!productSales[key]) {
+            productSales[key] = { name: item.productName || 'Unknown', quantity: 0, revenue: 0 };
+          }
+          productSales[key].quantity += item.quantity || 0;
+          productSales[key].revenue += (item.price || 0) * (item.quantity || 0);
+        });
+      }
     });
 
     const topProducts = Object.values(productSales)
@@ -172,7 +182,10 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       period,
-      dateRange: { start, end },
+      dateRange: { 
+        start: start.toISOString(), 
+        end: end.toISOString() 
+      },
       stats: {
         revenue: currentRevenue,
         revenueGrowth: Math.round(revenueGrowth * 10) / 10,
@@ -200,25 +213,26 @@ export async function GET(request: NextRequest) {
 async function getChartData(period: PeriodType, start: Date, end: Date) {
   const data: { label: string; revenue: number; orders: number }[] = [];
 
+  // Lấy tất cả orders trong khoảng thời gian một lần
+  const allOrders = await Order.find({
+    createdAt: { $gte: start, $lte: end },
+    status: 'delivered'
+  }).lean() || [];
+
   if (period === 'day') {
     // Hourly breakdown
     for (let hour = 0; hour < 24; hour++) {
-      const hourStart = new Date(start);
-      hourStart.setHours(hour, 0, 0, 0);
-      const hourEnd = new Date(start);
-      hourEnd.setHours(hour, 59, 59, 999);
+      const hourOrders = allOrders.filter(o => {
+        const orderHour = new Date(o.createdAt).getHours();
+        return orderHour === hour;
+      });
 
-      const orders = await Order.find({
-        createdAt: { $gte: hourStart, $lte: hourEnd },
-        status: 'delivered'
-      }).lean();
-
-      const revenue = orders.reduce((sum, o) => sum + (o.totalAmount || 0) - (o.shippingFee || 0), 0);
+      const revenue = hourOrders.reduce((sum, o) => sum + (o.totalAmount || 0) - (o.shippingFee || 0), 0);
 
       data.push({
         label: `${hour}:00`,
         revenue,
-        orders: orders.length
+        orders: hourOrders.length
       });
     }
   } else if (period === 'month') {
@@ -226,62 +240,55 @@ async function getChartData(period: PeriodType, start: Date, end: Date) {
     const daysInMonth = new Date(start.getFullYear(), start.getMonth() + 1, 0).getDate();
     
     for (let day = 1; day <= daysInMonth; day++) {
-      const dayStart = new Date(start.getFullYear(), start.getMonth(), day, 0, 0, 0, 0);
-      const dayEnd = new Date(start.getFullYear(), start.getMonth(), day, 23, 59, 59, 999);
+      const dayOrders = allOrders.filter(o => {
+        const orderDate = new Date(o.createdAt);
+        return orderDate.getDate() === day;
+      });
 
-      const orders = await Order.find({
-        createdAt: { $gte: dayStart, $lte: dayEnd },
-        status: 'delivered'
-      }).lean();
-
-      const revenue = orders.reduce((sum, o) => sum + (o.totalAmount || 0) - (o.shippingFee || 0), 0);
+      const revenue = dayOrders.reduce((sum, o) => sum + (o.totalAmount || 0) - (o.shippingFee || 0), 0);
 
       data.push({
         label: `${day}`,
         revenue,
-        orders: orders.length
+        orders: dayOrders.length
       });
     }
   } else if (period === 'quarter') {
     // Monthly breakdown
     const quarterStart = start.getMonth();
+    const monthNames = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'];
     
     for (let i = 0; i < 3; i++) {
-      const monthStart = new Date(start.getFullYear(), quarterStart + i, 1, 0, 0, 0, 0);
-      const monthEnd = new Date(start.getFullYear(), quarterStart + i + 1, 0, 23, 59, 59, 999);
+      const targetMonth = quarterStart + i;
+      const monthOrders = allOrders.filter(o => {
+        const orderMonth = new Date(o.createdAt).getMonth();
+        return orderMonth === targetMonth;
+      });
 
-      const orders = await Order.find({
-        createdAt: { $gte: monthStart, $lte: monthEnd },
-        status: 'delivered'
-      }).lean();
+      const revenue = monthOrders.reduce((sum, o) => sum + (o.totalAmount || 0) - (o.shippingFee || 0), 0);
 
-      const revenue = orders.reduce((sum, o) => sum + (o.totalAmount || 0) - (o.shippingFee || 0), 0);
-
-      const monthNames = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'];
       data.push({
-        label: monthNames[quarterStart + i],
+        label: monthNames[targetMonth],
         revenue,
-        orders: orders.length
+        orders: monthOrders.length
       });
     }
   } else {
     // Yearly - monthly breakdown
+    const monthNames = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'];
+    
     for (let month = 0; month < 12; month++) {
-      const monthStart = new Date(start.getFullYear(), month, 1, 0, 0, 0, 0);
-      const monthEnd = new Date(start.getFullYear(), month + 1, 0, 23, 59, 59, 999);
+      const monthOrders = allOrders.filter(o => {
+        const orderMonth = new Date(o.createdAt).getMonth();
+        return orderMonth === month;
+      });
 
-      const orders = await Order.find({
-        createdAt: { $gte: monthStart, $lte: monthEnd },
-        status: 'delivered'
-      }).lean();
+      const revenue = monthOrders.reduce((sum, o) => sum + (o.totalAmount || 0) - (o.shippingFee || 0), 0);
 
-      const revenue = orders.reduce((sum, o) => sum + (o.totalAmount || 0) - (o.shippingFee || 0), 0);
-
-      const monthNames = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'];
       data.push({
         label: monthNames[month],
         revenue,
-        orders: orders.length
+        orders: monthOrders.length
       });
     }
   }
