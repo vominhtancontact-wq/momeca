@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthStore } from '@/stores/authStore';
 import Input from '@/components/ui/Input';
@@ -9,13 +9,22 @@ import Button from '@/components/ui/Button';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuthStore();
+  const searchParams = useSearchParams();
+  const { login, isAuthenticated } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
+
+  // Redirect nếu đã đăng nhập
+  useEffect(() => {
+    if (isAuthenticated) {
+      const redirect = searchParams.get('redirect') || '/';
+      router.push(redirect);
+    }
+  }, [isAuthenticated, router, searchParams]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -38,7 +47,9 @@ export default function LoginPage() {
 
       if (data.success) {
         login(data.data.user, data.data.token);
-        router.push('/');
+        // Redirect về trang trước đó hoặc trang chủ
+        const redirect = searchParams.get('redirect') || '/';
+        router.push(redirect);
       } else {
         setError(data.error || 'Đăng nhập thất bại');
       }

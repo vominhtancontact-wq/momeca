@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Product, ProductVariant } from '@/types';
 import { formatPrice, formatNumber } from '@/lib/utils';
 import { useCartStore } from '@/stores/cartStore';
+import { useAuthStore } from '@/stores/authStore';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import QuantitySelector from './QuantitySelector';
@@ -14,14 +16,17 @@ interface ProductInfoProps {
 }
 
 export default function ProductInfo({ product }: ProductInfoProps) {
+  const router = useRouter();
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | undefined>(
     product.variants && product.variants.length > 0 ? product.variants[0] : undefined
   );
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
   const addItem = useCartStore((state) => state.addItem);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   const currentPrice = selectedVariant?.price ?? product.price;
   const originalPrice = selectedVariant?.originalPrice ?? product.originalPrice;
@@ -30,6 +35,12 @@ export default function ProductInfo({ product }: ProductInfoProps) {
 
   const handleAddToCart = () => {
     if (!isInStock) return;
+
+    // Kiểm tra đăng nhập
+    if (!isAuthenticated) {
+      setShowLoginPrompt(true);
+      return;
+    }
 
     setIsAdding(true);
     addItem(product, selectedVariant, quantity);
@@ -40,6 +51,12 @@ export default function ProductInfo({ product }: ProductInfoProps) {
       setShowNotification(false);
       setIsAdding(false);
     }, 2000);
+  };
+
+  const handleLogin = () => {
+    // Lưu URL hiện tại để redirect sau khi đăng nhập
+    const currentPath = window.location.pathname;
+    router.push(`/dang-nhap?redirect=${encodeURIComponent(currentPath)}`);
   };
 
   return (
@@ -123,6 +140,41 @@ export default function ProductInfo({ product }: ProductInfoProps) {
       {showNotification && (
         <div className="fixed bottom-4 right-4 bg-success text-white px-6 py-3 rounded-lg shadow-lg animate-slide-up z-50">
           ✓ Đã thêm vào giỏ hàng
+        </div>
+      )}
+
+      {/* Login Prompt Modal */}
+      {showLoginPrompt && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 max-w-sm mx-4 shadow-xl">
+            <div className="text-center">
+              <div className="w-16 h-16 mx-auto mb-4 bg-primary/10 rounded-full flex items-center justify-center">
+                <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">
+                Vui lòng đăng nhập
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowLoginPrompt(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  Để sau
+                </button>
+                <button
+                  onClick={handleLogin}
+                  className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                >
+                  Đăng nhập
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
