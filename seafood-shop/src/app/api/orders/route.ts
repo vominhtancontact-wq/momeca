@@ -52,6 +52,28 @@ export async function POST(request: NextRequest) {
   try {
     await dbConnect();
 
+    // Kiểm tra authentication
+    const token = request.cookies.get('token')?.value;
+    if (!token) {
+      return NextResponse.json(
+        { success: false, error: { message: 'Vui lòng đăng nhập để đặt hàng' } },
+        { status: 401 }
+      );
+    }
+
+    // Verify token và lấy userId
+    const jwt = require('jsonwebtoken');
+    let userId;
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      userId = decoded.userId;
+    } catch (error) {
+      return NextResponse.json(
+        { success: false, error: { message: 'Phiên đăng nhập không hợp lệ' } },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const { customerName, customerPhone, customerEmail, customerAddress, customerNote, deliveryDate, deliveryTime, paymentMethod, items, couponCode } = body;
 
@@ -172,6 +194,7 @@ export async function POST(request: NextRequest) {
     // Create order
     const order = await Order.create({
       orderNumber,
+      userId, // Lưu userId
       customerName,
       customerPhone,
       customerEmail,
