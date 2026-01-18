@@ -27,6 +27,7 @@ export default function AddProductPage() {
     isActive: true,
     isBestSeller: false,
     isHotDeal: false,
+    isCombo: false,
   });
 
   useEffect(() => {
@@ -301,6 +302,15 @@ export default function AddProductPage() {
               className="w-4 h-4 text-primary"
             />
             <span>Khuyến mãi hot</span>
+          </label>
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={formData.isCombo}
+              onChange={(e) => setFormData((prev) => ({ ...prev, isCombo: e.target.checked }))}
+              className="w-4 h-4 text-primary"
+            />
+            <span>Combo tiết kiệm</span>
           </label>
         </div>
 

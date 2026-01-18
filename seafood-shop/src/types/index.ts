@@ -24,6 +24,7 @@ export interface Product {
   unit?: string;
   isBestSeller?: boolean;
   isHotDeal?: boolean;
+  isCombo?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

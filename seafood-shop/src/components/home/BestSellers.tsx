@@ -8,13 +8,12 @@ import ProductGrid from '@/components/product/ProductGrid';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-async function getBestSellersData(limit = 15) {
+async function getBestSellersData() {
   try {
     await dbConnect();
     const products = await Product.find({ isBestSeller: true })
       .populate('category', 'name slug')
       .sort({ soldCount: -1 })
-      .limit(limit)
       .lean();
     
     // Convert MongoDB documents to plain objects
@@ -26,7 +25,7 @@ async function getBestSellersData(limit = 15) {
 }
 
 export default async function BestSellers() {
-  const products = await getBestSellersData(15);
+  const products = await getBestSellersData();
 
   return (
     <section className="py-8 md:py-12 bg-cream">

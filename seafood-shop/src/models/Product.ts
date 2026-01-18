@@ -24,6 +24,7 @@ export interface IProduct extends Document {
   unit?: string;
   isBestSeller?: boolean;
   isHotDeal?: boolean;
+  isCombo?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -100,6 +101,10 @@ const ProductSchema = new Schema<IProduct>({
     default: false
   },
   isHotDeal: {
+    type: Boolean,
+    default: false
+  },
+  isCombo: {
     type: Boolean,
     default: false
   }

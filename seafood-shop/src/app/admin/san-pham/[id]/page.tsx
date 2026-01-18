@@ -46,6 +46,7 @@ export default function EditProductPage() {
     isActive: true,
     isBestSeller: false,
     isHotDeal: false,
+    isCombo: false,
   });
 
   useEffect(() => {
@@ -79,6 +80,7 @@ export default function EditProductPage() {
             isActive: product.isActive ?? true,
             isBestSeller: product.isBestSeller ?? false,
             isHotDeal: product.isHotDeal ?? false,
+            isCombo: product.isCombo ?? false,
           });
         }
       })
@@ -336,6 +338,15 @@ export default function EditProductPage() {
               className="w-4 h-4 text-primary"
             />
             <span>Khuyến mãi hot</span>
+          </label>
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={formData.isCombo}
+              onChange={(e) => setFormData((prev) => ({ ...prev, isCombo: e.target.checked }))}
+              className="w-4 h-4 text-primary"
+            />
+            <span>Combo tiết kiệm</span>
           </label>
         </div>
 

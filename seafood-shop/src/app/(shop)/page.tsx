@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { Suspense } from 'react';
 import HeroSection from '@/components/home/HeroSection';
 import BestSellers from '@/components/home/BestSellers';
+import ComboDeals from '@/components/home/ComboDeals';
 import PromoBanner from '@/components/home/PromoBanner';
 import HotDeals from '@/components/home/HotDeals';
 import FlashSale from '@/components/home/FlashSale';
@@ -40,6 +41,11 @@ export default function HomePage() {
       {/* Best Sellers Section */}
       <Suspense fallback={<SectionLoading title="🔥 Hải Sản Bán Chạy" />}>
         <BestSellers />
+      </Suspense>
+
+      {/* Combo Deals Section */}
+      <Suspense fallback={<SectionLoading title="🎁 Combo Tiết Kiệm" />}>
+        <ComboDeals />
       </Suspense>
 
       {/* Promo Banner Slider */}

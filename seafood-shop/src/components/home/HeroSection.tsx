@@ -88,7 +88,7 @@ const bottomBanners = [
     title: 'Combo Hải Sản',
     subtitle: 'Tiết kiệm đến 20%',
     badge: 'SALE',
-    link: '/danh-muc/combo',
+    link: '/combo',
     gradient: 'from-slate-700 to-slate-900'
   },
   {
