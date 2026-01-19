@@ -154,9 +154,7 @@ export default function CheckoutForm() {
           console.log('Redirecting to payment page...');
           const orderNumber = response.data.orderNumber;
           
-          // Clear cart SAU KHI đã có orderNumber
-          clearCart();
-          
+          // KHÔNG clear cart ở đây - để trang chờ thanh toán tự clear
           // Sử dụng window.location để force redirect
           window.location.href = `/cho-thanh-toan?orderNumber=${orderNumber}`;
         } else {

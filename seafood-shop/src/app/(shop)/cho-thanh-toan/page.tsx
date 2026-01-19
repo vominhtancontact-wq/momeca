@@ -4,10 +4,12 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useCartStore } from '@/stores/cartStore';
 
 function PendingPaymentContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { clearCart } = useCartStore();
   const orderNumber = searchParams.get('orderNumber');
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -18,6 +20,9 @@ function PendingPaymentContent() {
       router.push('/');
       return;
     }
+
+    // Clear cart khi vào trang chờ thanh toán
+    clearCart();
 
     fetchOrder();
     

@@ -10,20 +10,28 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    console.log('PATCH /api/orders/[id] - Starting request');
+    
     await dbConnect();
+    console.log('Database connected');
 
     // Kiểm tra admin authentication
-    const adminToken = request.cookies.get('adminToken')?.value;
+    const adminToken = request.cookies.get('admin_token')?.value;
+    console.log('Admin token present:', !!adminToken);
+    
     if (!adminToken) {
+      console.log('No admin token found');
       return NextResponse.json(
-        { success: false, error: { message: 'Unauthorized' } },
+        { success: false, error: { message: 'Unauthorized - No token' } },
         { status: 401 }
       );
     }
 
     try {
-      jwt.verify(adminToken, JWT_SECRET);
+      const decoded = jwt.verify(adminToken, JWT_SECRET);
+      console.log('Token verified, admin:', decoded);
     } catch (error) {
+      console.log('Token verification failed:', error);
       return NextResponse.json(
         { success: false, error: { message: 'Invalid token' } },
         { status: 401 }
@@ -31,12 +39,18 @@ export async function PATCH(
     }
 
     const { id } = await params;
+    console.log('Order ID:', id);
+    
     const body = await request.json();
+    console.log('Request body:', body);
+    
     const { status, paymentStatus } = body;
 
     const updateData: any = {};
     if (status) updateData.status = status;
     if (paymentStatus) updateData.paymentStatus = paymentStatus;
+
+    console.log('Update data:', updateData);
 
     const order = await Order.findByIdAndUpdate(
       id,
@@ -45,20 +59,22 @@ export async function PATCH(
     );
 
     if (!order) {
+      console.log('Order not found');
       return NextResponse.json(
         { success: false, error: { message: 'Không tìm thấy đơn hàng' } },
         { status: 404 }
       );
     }
 
+    console.log('Order updated successfully:', order._id);
     return NextResponse.json({
       success: true,
       data: order
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating order:', error);
     return NextResponse.json(
-      { success: false, error: { message: 'Lỗi khi cập nhật đơn hàng' } },
+      { success: false, error: { message: error.message || 'Lỗi khi cập nhật đơn hàng' } },
       { status: 500 }
     );
   }
