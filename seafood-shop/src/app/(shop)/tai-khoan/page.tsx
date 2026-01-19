@@ -352,12 +352,11 @@ export default function AccountPage() {
             ) : (
               <div className="space-y-4">
                 {orders.map((order) => (
-                  <Link
+                  <div
                     key={order._id}
-                    href={`/tra-cuu-don-hang?orderNumber=${order.orderNumber}`}
                     className="block p-4 border rounded-lg hover:border-primary transition-colors"
                   >
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between mb-3">
                       <div>
                         <p className="font-medium text-gray-900">{order.orderNumber}</p>
                         <p className="text-sm text-gray-500">
@@ -371,7 +370,30 @@ export default function AccountPage() {
                         </span>
                       </div>
                     </div>
-                  </Link>
+                    
+                    {/* Payment status for online orders */}
+                    {(order as any).paymentMethod === 'online' && (order as any).paymentStatus === 'pending' && (
+                      <div className="flex items-center justify-between pt-3 border-t">
+                        <span className="text-sm text-yellow-600 font-medium">
+                          ⏳ Chờ thanh toán
+                        </span>
+                        <Link
+                          href={`/cho-thanh-toan?orderNumber=${order.orderNumber}`}
+                          className="text-sm text-primary hover:underline font-medium"
+                        >
+                          Xem QR thanh toán →
+                        </Link>
+                      </div>
+                    )}
+                    
+                    {(order as any).paymentMethod === 'online' && (order as any).paymentStatus === 'paid' && (
+                      <div className="pt-3 border-t">
+                        <span className="text-sm text-green-600 font-medium">
+                          ✓ Đã thanh toán
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
             )}

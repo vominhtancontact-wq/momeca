@@ -13,10 +13,12 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20');
     const status = searchParams.get('status');
     const phone = searchParams.get('phone');
+    const orderNumber = searchParams.get('orderNumber');
 
     const query: Record<string, unknown> = {};
     if (status) query.status = status;
     if (phone) query.customerPhone = phone;
+    if (orderNumber) query.orderNumber = orderNumber;
 
     const skip = (page - 1) * limit;
 
@@ -54,7 +56,13 @@ export async function POST(request: NextRequest) {
 
     // Kiểm tra authentication
     const token = request.cookies.get('token')?.value;
+    console.log('=== ORDER CREATE DEBUG ===');
+    console.log('Token exists:', !!token);
+    console.log('Token value:', token ? token.substring(0, 20) + '...' : 'none');
+    
     if (!token) {
+      console.log('No token found - returning 401');
+      console.log('=== END DEBUG ===');
       return NextResponse.json(
         { success: false, error: { message: 'Vui lòng đăng nhập để đặt hàng' } },
         { status: 401 }
@@ -67,12 +75,16 @@ export async function POST(request: NextRequest) {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       userId = decoded.userId;
+      console.log('Token verified, userId:', userId);
     } catch (error) {
+      console.log('Token verification failed:', error);
+      console.log('=== END DEBUG ===');
       return NextResponse.json(
         { success: false, error: { message: 'Phiên đăng nhập không hợp lệ' } },
         { status: 401 }
       );
     }
+    console.log('=== END DEBUG ===');
 
     const body = await request.json();
     const { customerName, customerPhone, customerEmail, customerAddress, customerNote, deliveryDate, deliveryTime, paymentMethod, items, couponCode } = body;

@@ -8,6 +8,7 @@ async function fetchApi<T>(
   options?: RequestInit
 ): Promise<T> {
   const response = await fetch(`${API_BASE}${endpoint}`, {
+    credentials: 'include', // Gửi cookies kèm theo request
     headers: {
       'Content-Type': 'application/json',
       ...options?.headers,

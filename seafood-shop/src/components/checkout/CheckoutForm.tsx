@@ -144,8 +144,30 @@ export default function CheckoutForm() {
       });
 
       if (response.success && response.data) {
-        clearCart();
-        router.push(`/dat-hang-thanh-cong?orderNumber=${response.data.orderNumber}`);
+        console.log('Order created successfully:', response.data);
+        console.log('Payment method:', formData.paymentMethod);
+        console.log('Order number:', response.data.orderNumber);
+        
+        // Phân luồng theo phương thức thanh toán
+        if (formData.paymentMethod === 'online') {
+          // Thanh toán online: chuyển đến trang chờ thanh toán với QR code
+          console.log('Redirecting to payment page...');
+          const orderNumber = response.data.orderNumber;
+          
+          // Clear cart SAU KHI đã có orderNumber
+          clearCart();
+          
+          // Sử dụng window.location để force redirect
+          window.location.href = `/cho-thanh-toan?orderNumber=${orderNumber}`;
+        } else {
+          // COD: chuyển đến trang tài khoản
+          clearCart();
+          alert('Đặt hàng thành công! Chúng tôi sẽ liên hệ với bạn sớm nhất.');
+          router.push('/tai-khoan');
+        }
+      } else {
+        console.error('Order creation failed:', response);
+        alert('Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại.');
       }
     } catch (error) {
       console.error('Error creating order:', error);
@@ -363,13 +385,16 @@ export default function CheckoutForm() {
 
         {formData.paymentMethod === 'online' && (
           <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-100">
-            <p className="text-sm font-medium text-blue-800 mb-2">Thông tin chuyển khoản:</p>
-            <div className="text-sm text-blue-700 space-y-1">
+            <p className="text-sm font-medium text-blue-800 mb-3">Thông tin chuyển khoản:</p>
+            <div className="text-sm text-blue-700 space-y-1 mb-3">
               <p>Ngân hàng: <span className="font-medium">TPBank</span></p>
               <p>Số tài khoản: <span className="font-medium">29981722000</span></p>
               <p>Chủ tài khoản: <span className="font-medium">VO THI THUY TIEN</span></p>
               <p className="text-xs mt-2 text-blue-600">Nội dung CK: [Số điện thoại] - [Họ tên]</p>
             </div>
+            <p className="text-xs text-blue-600 italic">
+              * QR code thanh toán sẽ hiển thị sau khi đặt hàng thành công
+            </p>
           </div>
         )}
       </div>

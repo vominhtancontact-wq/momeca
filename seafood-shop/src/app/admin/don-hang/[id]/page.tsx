@@ -2,6 +2,7 @@ import Link from 'next/link';
 import dbConnect from '@/lib/db';
 import { Order } from '@/models';
 import OrderStatusSelectClient from '../OrderStatusSelectClient';
+import ConfirmPaymentButton from '../ConfirmPaymentButton';
 import { formatPrice } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
@@ -205,6 +206,17 @@ export default async function OrderDetailPage({ params }: PageProps) {
                   {paymentMethodLabels[order.paymentMethod] || order.paymentMethod}
                 </p>
               </div>
+              
+              {/* Payment Status & Confirm Button */}
+              {order.paymentMethod === 'online' && (
+                <div className="pt-3 border-t">
+                  <p className="text-sm text-gray-600 mb-3">Trạng thái thanh toán</p>
+                  <ConfirmPaymentButton 
+                    orderId={order._id.toString()} 
+                    paymentStatus={order.paymentStatus}
+                  />
+                </div>
+              )}
             </div>
           </div>
 
