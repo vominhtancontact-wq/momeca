@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import dbConnect from '@/lib/db';
 import { Order } from '@/models';
 import OrderStatusSelectClient from './OrderStatusSelectClient';
@@ -36,6 +37,7 @@ export default async function OrdersPage() {
                   <th className="text-left py-3 px-4">Tổng tiền</th>
                   <th className="text-left py-3 px-4">Trạng thái</th>
                   <th className="text-left py-3 px-4">Ngày đặt</th>
+                  <th className="text-left py-3 px-4">Thao tác</th>
                 </tr>
               </thead>
               <tbody>
@@ -76,6 +78,14 @@ export default async function OrdersPage() {
                     </td>
                     <td className="py-3 px-4 text-sm text-gray-600">
                       {new Date(order.createdAt).toLocaleDateString('vi-VN')}
+                    </td>
+                    <td className="py-3 px-4">
+                      <Link
+                        href={`/admin/don-hang/${order._id}`}
+                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                      >
+                        Xem chi tiết
+                      </Link>
                     </td>
                   </tr>
                 ))}
