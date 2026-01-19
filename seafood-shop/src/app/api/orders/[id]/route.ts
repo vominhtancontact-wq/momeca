@@ -50,6 +50,17 @@ export async function PATCH(
     if (status) updateData.status = status;
     if (paymentStatus) updateData.paymentStatus = paymentStatus;
 
+    // Logic tự động: Khi chuyển trạng thái đơn hàng sang "confirmed", 
+    // tự động đánh dấu thanh toán online là "paid"
+    if (status === 'confirmed' && !paymentStatus) {
+      // Lấy thông tin đơn hàng hiện tại để kiểm tra paymentMethod
+      const currentOrder = await Order.findById(id);
+      if (currentOrder && currentOrder.paymentMethod === 'online' && currentOrder.paymentStatus === 'pending') {
+        updateData.paymentStatus = 'paid';
+        console.log('Auto-updating payment status to paid for online payment order');
+      }
+    }
+
     console.log('Update data:', updateData);
 
     const order = await Order.findByIdAndUpdate(
