@@ -49,9 +49,9 @@ export const metadata: Metadata = {
     description: 'Mua hải sản tươi sống, IQF chất lượng cao. Cua, tôm, cá, ốc, mực... Giao hàng nhanh, giá tốt nhất thị trường.',
     images: [
       {
-        url: '/images/logo.png',
-        width: 800,
-        height: 800,
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
         alt: 'Mỡ Mê Cá - Hải sản tươi sống',
       },
     ],
@@ -60,7 +60,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Mỡ Mê Cá - Chuyên cung cấp hải sản tươi sống và IQF',
     description: 'Mua hải sản tươi sống, IQF chất lượng cao. Cua, tôm, cá, ốc, mực... Giao hàng nhanh, giá tốt nhất thị trường.',
-    images: ['/images/logo.png'],
+    images: ['/og-image.jpg'],
   },
   robots: {
     index: true,
