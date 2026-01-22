@@ -39,18 +39,28 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
+  metadataBase: new URL('https://momeca.vn'),
   openGraph: {
     type: 'website',
     locale: 'vi_VN',
+    url: 'https://momeca.vn',
     siteName: 'Mỡ Mê Cá',
     title: 'Mỡ Mê Cá - Chuyên cung cấp hải sản tươi sống và IQF',
     description: 'Mua hải sản tươi sống, IQF chất lượng cao. Cua, tôm, cá, ốc, mực... Giao hàng nhanh, giá tốt nhất thị trường.',
+    images: [
+      {
+        url: '/images/logo.png',
+        width: 1200,
+        height: 630,
+        alt: 'Mỡ Mê Cá - Hải sản tươi sống',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Mỡ Mê Cá',
-    description: 'Chuyên cung cấp hải sản tươi sống và IQF chất lượng cao',
+    title: 'Mỡ Mê Cá - Chuyên cung cấp hải sản tươi sống và IQF',
+    description: 'Mua hải sản tươi sống, IQF chất lượng cao. Cua, tôm, cá, ốc, mực... Giao hàng nhanh, giá tốt nhất thị trường.',
+    images: ['/images/logo.png'],
   },
   robots: {
     index: true,
