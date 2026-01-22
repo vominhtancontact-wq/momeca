@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Open Graph - Mỡ Mê Cá</title>
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="vi_VN">
+    <meta property="og:url" content="https://momeca.vn">
+    <meta property="og:site_name" content="Mỡ Mê Cá">
+    <meta property="og:title" content="Mỡ Mê Cá - Chuyên cung cấp hải sản tươi sống và IQF">
+    <meta property="og:description" content="Mua hải sản tươi sống, IQF chất lượng cao. Cua, tôm, cá, ốc, mực... Giao hàng nhanh, giá tốt nhất thị trường.">
+    <meta property="og:image" content="https://momeca.vn/og-image.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Mỡ Mê Cá - Hải sản tươi sống">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Mỡ Mê Cá - Chuyên cung cấp hải sản tươi sống và IQF">
+    <meta name="twitter:description" content="Mua hải sản tươi sống, IQF chất lượng cao. Cua, tôm, cá, ốc, mực... Giao hàng nhanh, giá tốt nhất thị trường.">
+    <meta name="twitter:image" content="https://momeca.vn/og-image.jpg">
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #0891b2;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+        }
+        .success {
+            background: #d1fae5;
+            border-left-color: #10b981;
+        }
+        .error {
+            background: #fee2e2;
+            border-left-color: #ef4444;
+        }
+        .image-preview {
+            margin: 20px 0;
+            text-align: center;
+        }
+        .image-preview img {
+            max-width: 100%;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+        }
+        .instructions {
+            background: #eff6ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .instructions ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .instructions li {
+            margin: 10px 0;
+        }
+        code {
+            background: #1f2937;
+            color: #10b981;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #0891b2;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            margin: 10px 5px;
+        }
+        .btn:hover {
+            background: #0e7490;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🔍 Test Open Graph Meta Tags</h1>
+        
+        <div class="status" id="imageStatus">
+            <strong>⚠️ Đang kiểm tra ảnh OG...</strong>
+        </div>
+        
+        <div class="image-preview">
+            <h3>Preview ảnh Open Graph:</h3>
+            <img id="ogImage" src="/og-image.jpg" alt="OG Image" onerror="handleImageError()">
+            <p id="imageInfo"></p>
+        </div>
+        
+        <div class="instructions">
+            <h3>📋 Hướng dẫn thay thế ảnh OG:</h3>
+            <ol>
+                <li>Lưu ảnh hải sản về máy (ảnh bạn muốn dùng)</li>
+                <li>Mở File Explorer, vào: <code>C:\Users\Lenovo\Documents\momeca\seafood-shop\public\</code></li>
+                <li>Xóa file <code>og-image.jpg</code> cũ (55 bytes)</li>
+                <li>Copy ảnh mới vào và đổi tên thành <code>og-image.jpg</code></li>
+                <li>Đảm bảo file có kích thước > 100KB</li>
+                <li>Refresh trang này để kiểm tra</li>
+            </ol>
+        </div>
+        
+        <div>
+            <h3>🧪 Test với các công cụ:</h3>
+            <a href="https://developers.facebook.com/tools/debug/?q=https://momeca.vn" target="_blank" class="btn">
+                Facebook Debugger
+            </a>
+            <a href="https://www.linkedin.com/post-inspector/inspect/https://momeca.vn" target="_blank" class="btn">
+                LinkedIn Inspector
+            </a>
+            <a href="https://cards-dev.twitter.com/validator" target="_blank" class="btn">
+                Twitter Validator
+            </a>
+        </div>
+        
+        <div class="instructions" style="margin-top: 30px;">
+            <h3>✅ Sau khi thay ảnh xong:</h3>
+            <ol>
+                <li>Commit và push code: <code>git add . && git commit -m "Update OG image" && git push</code></li>
+                <li>Đợi Vercel deploy xong</li>
+                <li>Vào Facebook Debugger và click "Scrape Again"</li>
+                <li>Test chia sẻ link trên Zalo/Facebook</li>
+            </ol>
+        </div>
+    </div>
+    
+    <script>
+        function handleImageError() {
+            const status = document.getElementById('imageStatus');
+            status.className = 'status error';
+            status.innerHTML = '<strong>❌ Lỗi:</strong> File og-image.jpg không tồn tại hoặc bị lỗi (vẫn là file 55 bytes)';
+            
+            const info = document.getElementById('imageInfo');
+            info.innerHTML = '<strong style="color: #ef4444;">File chưa được thay thế đúng!</strong>';
+        }
+        
+        const img = document.getElementById('ogImage');
+        img.onload = function() {
+            const status = document.getElementById('imageStatus');
+            const info = document.getElementById('imageInfo');
+            
+            if (this.naturalWidth > 0 && this.naturalHeight > 0) {
+                status.className = 'status success';
+                status.innerHTML = '<strong>✅ Thành công:</strong> Ảnh OG đã được tải!';
+                info.innerHTML = `Kích thước: ${this.naturalWidth} x ${this.naturalHeight}px`;
+            } else {
+                handleImageError();
+            }
+        };
+    </script>
+</body>
+</html>
