@@ -3,6 +3,7 @@ import dbConnect from '@/lib/db';
 import Order from '@/models/Order';
 import Product from '@/models/Product';
 import Coupon from '@/models/Coupon';
+import { sendNewOrderNotification } from '@/lib/email';
 
 export async function GET(request: NextRequest) {
   try {
@@ -223,6 +224,24 @@ export async function POST(request: NextRequest) {
       paymentMethod: selectedPaymentMethod,
       paymentStatus: 'pending',
       status: 'pending'
+    });
+
+    // Send Telegram notification (non-blocking)
+    sendNewOrderNotification({
+      orderNumber: order.orderNumber,
+      customerName: order.customerName,
+      customerPhone: order.customerPhone,
+      customerAddress: order.customerAddress,
+      totalAmount: order.totalAmount,
+      paymentMethod: order.paymentMethod,
+      items: orderItems.map(item => ({
+        productName: item.productName,
+        quantity: item.quantity,
+        price: item.price,
+      })),
+    }).catch(error => {
+      console.error('Failed to send Telegram notification:', error);
+      // Don't fail the order creation if notification fails
     });
 
     return NextResponse.json({
