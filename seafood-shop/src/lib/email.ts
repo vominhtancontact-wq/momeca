@@ -1,10 +1,6 @@
 // Email notification helper using Gmail SMTP
 import nodemailer from 'nodemailer';
 
-const GMAIL_USER = process.env.GMAIL_USER;
-const GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD;
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || GMAIL_USER;
-
 interface OrderNotification {
   orderNumber: string;
   customerName: string;
@@ -20,9 +16,16 @@ interface OrderNotification {
 }
 
 export async function sendNewOrderNotification(order: OrderNotification) {
+  // Load env variables dynamically
+  const GMAIL_USER = process.env.GMAIL_USER;
+  const GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD;
+  const ADMIN_EMAIL = process.env.ADMIN_EMAIL || GMAIL_USER;
+
   // Skip if Gmail is not configured
   if (!GMAIL_USER || !GMAIL_APP_PASSWORD) {
     console.log('Email notification skipped: Gmail credentials not configured');
+    console.log('GMAIL_USER:', GMAIL_USER);
+    console.log('GMAIL_APP_PASSWORD:', GMAIL_APP_PASSWORD ? 'exists' : 'missing');
     return { success: false, message: 'Gmail not configured' };
   }
 
