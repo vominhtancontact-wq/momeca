@@ -1,8 +1,9 @@
 // Email notification helper using Gmail SMTP
+import nodemailer from 'nodemailer';
 
 const GMAIL_USER = process.env.GMAIL_USER;
 const GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD;
-const NOTIFICATION_EMAIL = process.env.NOTIFICATION_EMAIL;
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || GMAIL_USER;
 
 interface OrderNotification {
   orderNumber: string;
@@ -20,14 +21,12 @@ interface OrderNotification {
 
 export async function sendNewOrderNotification(order: OrderNotification) {
   // Skip if Gmail is not configured
-  if (!GMAIL_USER || !GMAIL_APP_PASSWORD || !NOTIFICATION_EMAIL) {
+  if (!GMAIL_USER || !GMAIL_APP_PASSWORD) {
     console.log('Email notification skipped: Gmail credentials not configured');
     return { success: false, message: 'Gmail not configured' };
   }
 
   try {
-    const nodemailer = require('nodemailer');
-
     // Create transporter
     const transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -62,31 +61,55 @@ export async function sendNewOrderNotification(order: OrderNotification) {
   <style>
     body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
     .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
-    .content { background: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px; }
-    .section { background: white; padding: 15px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    .section-title { font-size: 16px; font-weight: bold; color: #667eea; margin-bottom: 10px; }
-    table { width: 100%; border-collapse: collapse; }
-    .info-row { margin-bottom: 8px; }
+    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+    .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+    .section { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .section-title { font-size: 18px; font-weight: bold; color: #667eea; margin-bottom: 15px; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+    .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
     .info-label { font-weight: bold; color: #666; }
+    .info-value { color: #333; }
+    table { width: 100%; border-collapse: collapse; }
     .total { font-size: 20px; font-weight: bold; color: #667eea; text-align: right; margin-top: 15px; }
-    .button { display: inline-block; padding: 12px 24px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; margin-top: 15px; }
+    .button { display: inline-block; padding: 12px 30px; background: #667eea; color: white; text-decoration: none; border-radius: 5px; margin-top: 20px; }
+    .footer { text-align: center; color: #999; font-size: 12px; margin-top: 30px; }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <h1 style="margin: 0;">🔔 ĐƠN HÀNG MỚI</h1>
-      <p style="margin: 10px 0 0 0; font-size: 18px;">Mã đơn: <strong>${order.orderNumber}</strong></p>
+      <h1 style="margin: 0; font-size: 28px;">🔔 ĐƠN HÀNG MỚI</h1>
+      <p style="margin: 10px 0 0 0; font-size: 16px;">Bạn có đơn hàng mới từ website Momeca</p>
     </div>
     
     <div class="content">
+      <!-- Order Info -->
+      <div class="section">
+        <div class="section-title">📋 Thông tin đơn hàng</div>
+        <div class="info-row">
+          <span class="info-label">Mã đơn hàng:</span>
+          <span class="info-value" style="font-weight: bold; color: #667eea;">${order.orderNumber}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Phương thức thanh toán:</span>
+          <span class="info-value">${paymentMethodText}</span>
+        </div>
+      </div>
+
       <!-- Customer Info -->
       <div class="section">
         <div class="section-title">👤 Thông tin khách hàng</div>
-        <div class="info-row"><span class="info-label">Tên:</span> ${order.customerName}</div>
-        <div class="info-row"><span class="info-label">SĐT:</span> ${order.customerPhone}</div>
-        <div class="info-row"><span class="info-label">Địa chỉ:</span> ${order.customerAddress}</div>
+        <div class="info-row">
+          <span class="info-label">Họ tên:</span>
+          <span class="info-value">${order.customerName}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Số điện thoại:</span>
+          <span class="info-value">${order.customerPhone}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Địa chỉ:</span>
+          <span class="info-value">${order.customerAddress}</span>
+        </div>
       </div>
 
       <!-- Products -->
@@ -95,9 +118,9 @@ export async function sendNewOrderNotification(order: OrderNotification) {
         <table>
           <thead>
             <tr style="background: #f5f5f5;">
-              <th style="padding: 8px; text-align: left;">Sản phẩm</th>
-              <th style="padding: 8px; text-align: center;">SL</th>
-              <th style="padding: 8px; text-align: right;">Thành tiền</th>
+              <th style="padding: 10px; text-align: left;">Sản phẩm</th>
+              <th style="padding: 10px; text-align: center;">Số lượng</th>
+              <th style="padding: 10px; text-align: right;">Thành tiền</th>
             </tr>
           </thead>
           <tbody>
@@ -149,7 +172,7 @@ ${order.items.map(item => `- ${item.productName} x${item.quantity} - ${formatCur
     // Send email
     const info = await transporter.sendMail({
       from: `"Momeca - Hải Sản" <${GMAIL_USER}>`,
-      to: NOTIFICATION_EMAIL,
+      to: ADMIN_EMAIL,
       subject: `🔔 Đơn hàng mới #${order.orderNumber} - ${order.customerName}`,
       text: textContent,
       html: htmlContent,
