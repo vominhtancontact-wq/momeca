@@ -226,7 +226,7 @@ export async function POST(request: NextRequest) {
       status: 'pending'
     });
 
-    // Send Telegram notification (non-blocking)
+    // Send email notification (non-blocking but log errors)
     sendNewOrderNotification({
       orderNumber: order.orderNumber,
       customerName: order.customerName,
@@ -239,8 +239,10 @@ export async function POST(request: NextRequest) {
         quantity: item.quantity,
         price: item.price,
       })),
+    }).then(result => {
+      console.log('📧 Email notification result:', result);
     }).catch(error => {
-      console.error('Failed to send Telegram notification:', error);
+      console.error('❌ Failed to send email notification:', error);
       // Don't fail the order creation if notification fails
     });
 
