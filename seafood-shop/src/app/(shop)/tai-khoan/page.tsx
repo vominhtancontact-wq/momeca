@@ -70,7 +70,29 @@ export default function AccountPage() {
 
   const fetchOrders = async () => {
     try {
-      const res = await fetch(`/api/orders?phone=${user?.phone}&limit=5`);
+      // Get token from zustand persisted storage
+      const authStorage = localStorage.getItem('auth-storage');
+      let token = null;
+      if (authStorage) {
+        const parsed = JSON.parse(authStorage);
+        token = parsed.state?.token;
+      }
+      
+      if (!token) {
+        console.log('No token found for fetching orders');
+        setLoading(false);
+        return;
+      }
+
+      // Fetch orders using userId from token (more reliable than phone)
+      const res = await fetch(`/api/orders?limit=10`, {
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      });
+      
       const data = await res.json();
       if (data.success) {
         setOrders(data.data);

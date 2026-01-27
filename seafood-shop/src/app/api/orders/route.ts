@@ -16,10 +16,32 @@ export async function GET(request: NextRequest) {
     const phone = searchParams.get('phone');
     const orderNumber = searchParams.get('orderNumber');
 
+    // Check if user is authenticated (for fetching their own orders)
+    const token = request.cookies.get('token')?.value || 
+                  request.headers.get('authorization')?.replace('Bearer ', '');
+    
+    let userId: string | null = null;
+    if (token) {
+      try {
+        const jwt = require('jsonwebtoken');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        userId = decoded.userId;
+      } catch (error) {
+        console.log('Token verification failed in GET orders:', error);
+      }
+    }
+
     const query: Record<string, unknown> = {};
-    if (status) query.status = status;
-    if (phone) query.customerPhone = phone;
-    if (orderNumber) query.orderNumber = orderNumber;
+    
+    // If userId is present and no phone/orderNumber specified, fetch user's orders
+    if (userId && !phone && !orderNumber) {
+      query.userId = userId;
+    } else {
+      // Otherwise use phone or orderNumber for lookup
+      if (status) query.status = status;
+      if (phone) query.customerPhone = phone;
+      if (orderNumber) query.orderNumber = orderNumber;
+    }
 
     const skip = (page - 1) * limit;
 
