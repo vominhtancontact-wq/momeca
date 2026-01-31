@@ -148,6 +148,9 @@ export default async function OrderDetailPage({ params }: PageProps) {
                     {item.variantName && (
                       <p className="text-sm text-gray-500">Phân loại: {item.variantName}</p>
                     )}
+                    {item.weightOptionName && (
+                      <p className="text-sm text-gray-500">Đơn vị: {item.weightOptionName}</p>
+                    )}
                     <p className="text-sm text-gray-600 mt-1">
                       {formatPrice(item.price)} x {item.quantity}
                     </p>
