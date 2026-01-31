@@ -7,6 +7,13 @@ export interface ProductVariant {
   inStock: boolean;
 }
 
+export interface WeightOption {
+  _id?: string;
+  name: string;
+  weight: number;
+  priceMultiplier: number;
+}
+
 export interface Product {
   _id: string;
   name: string;
@@ -18,6 +25,7 @@ export interface Product {
   images: string[];
   category: Category | string;
   variants?: ProductVariant[];
+  weightOptions?: WeightOption[];
   soldCount: number;
   inStock: boolean;
   tags?: string[];
@@ -45,7 +53,9 @@ export interface Category {
 export interface CartItem {
   product: Product;
   variant?: ProductVariant;
+  weightOption?: WeightOption;
   quantity: number;
+  finalPrice?: number; // Price after applying weight multiplier
 }
 
 export interface Cart {

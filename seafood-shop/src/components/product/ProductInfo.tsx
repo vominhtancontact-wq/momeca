@@ -59,7 +59,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
     }
 
     setIsAdding(true);
-    addItem(product, selectedVariant, quantity);
+    addItem(product, selectedVariant, selectedWeight, quantity);
 
     // Show notification
     setShowNotification(true);

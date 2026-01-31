@@ -13,17 +13,17 @@ interface CartItemProps {
 
 export default function CartItem({ item }: CartItemProps) {
   const { updateQuantity, removeItem } = useCartStore();
-  const { product, variant, quantity } = item;
+  const { product, variant, weightOption, quantity, finalPrice } = item;
 
-  const price = variant?.price ?? product.price;
+  const price = finalPrice ?? (variant?.price ?? product.price);
   const subtotal = price * quantity;
 
   const handleQuantityChange = (newQuantity: number) => {
-    updateQuantity(product._id, variant?._id, newQuantity);
+    updateQuantity(product._id, variant?._id, weightOption?._id, newQuantity);
   };
 
   const handleRemove = () => {
-    removeItem(product._id, variant?._id);
+    removeItem(product._id, variant?._id, weightOption?._id);
   };
 
   return (
@@ -59,6 +59,12 @@ export default function CartItem({ item }: CartItemProps) {
         {variant && (
           <p className="text-sm text-gray-500 mt-1">
             Loại: {variant.name}
+          </p>
+        )}
+
+        {weightOption && (
+          <p className="text-sm text-gray-500 mt-1">
+            Đơn vị: {weightOption.name}
           </p>
         )}
 

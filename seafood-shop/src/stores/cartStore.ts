@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { Product, ProductVariant, CartItem } from '@/types';
+import { Product, ProductVariant, WeightOption, CartItem } from '@/types';
 
 interface AppliedCoupon {
   code: string;
@@ -13,9 +13,9 @@ interface CartStore {
   currentUserId: string | null; // Track current user
   
   // Actions
-  addItem: (product: Product, variant?: ProductVariant, quantity?: number) => void;
-  removeItem: (productId: string, variantId?: string) => void;
-  updateQuantity: (productId: string, variantId: string | undefined, quantity: number) => void;
+  addItem: (product: Product, variant?: ProductVariant, weightOption?: WeightOption, quantity?: number) => void;
+  removeItem: (productId: string, variantId?: string, weightOptionId?: string) => void;
+  updateQuantity: (productId: string, variantId: string | undefined, weightOptionId: string | undefined, quantity: number) => void;
   clearCart: () => void;
   setCoupon: (coupon: AppliedCoupon | null) => void;
   
@@ -25,7 +25,7 @@ interface CartStore {
   // Computed
   getTotalItems: () => number;
   getTotalAmount: () => number;
-  getItemQuantity: (productId: string, variantId?: string) => number;
+  getItemQuantity: (productId: string, variantId?: string, weightOptionId?: string) => number;
 }
 
 // Helper to get storage key for a user
@@ -66,7 +66,7 @@ export const useCartStore = create<CartStore>()(
       appliedCoupon: null,
       currentUserId: null,
 
-      addItem: (product: Product, variant?: ProductVariant, quantity = 1) => {
+      addItem: (product: Product, variant?: ProductVariant, weightOption?: WeightOption, quantity = 1) => {
         const state = get();
         
         // Chặn nếu chưa đăng nhập (currentUserId = null)
@@ -79,8 +79,14 @@ export const useCartStore = create<CartStore>()(
           const existingIndex = state.items.findIndex(
             (item) =>
               item.product._id === product._id &&
-              item.variant?._id === variant?._id
+              item.variant?._id === variant?._id &&
+              item.weightOption?._id === weightOption?._id
           );
+
+          // Calculate final price with weight multiplier
+          const basePrice = variant?.price ?? product.price;
+          const weightMultiplier = weightOption?.priceMultiplier ?? 1;
+          const finalPrice = basePrice * weightMultiplier;
 
           let newItems: CartItem[];
           if (existingIndex > -1) {
@@ -90,7 +96,13 @@ export const useCartStore = create<CartStore>()(
               quantity: newItems[existingIndex].quantity + quantity,
             };
           } else {
-            newItems = [...state.items, { product, variant, quantity }];
+            newItems = [...state.items, { 
+              product, 
+              variant, 
+              weightOption,
+              quantity,
+              finalPrice
+            }];
           }
 
           // Save to user-specific storage
@@ -100,11 +112,13 @@ export const useCartStore = create<CartStore>()(
         });
       },
 
-      removeItem: (productId: string, variantId?: string) => {
+      removeItem: (productId: string, variantId?: string, weightOptionId?: string) => {
         set((state) => {
           const newItems = state.items.filter(
             (item) =>
-              !(item.product._id === productId && item.variant?._id === variantId)
+              !(item.product._id === productId && 
+                item.variant?._id === variantId &&
+                item.weightOption?._id === weightOptionId)
           );
           
           // Save to user-specific storage
@@ -114,15 +128,17 @@ export const useCartStore = create<CartStore>()(
         });
       },
 
-      updateQuantity: (productId: string, variantId: string | undefined, quantity: number) => {
+      updateQuantity: (productId: string, variantId: string | undefined, weightOptionId: string | undefined, quantity: number) => {
         if (quantity <= 0) {
-          get().removeItem(productId, variantId);
+          get().removeItem(productId, variantId, weightOptionId);
           return;
         }
 
         set((state) => {
           const newItems = state.items.map((item) =>
-            item.product._id === productId && item.variant?._id === variantId
+            item.product._id === productId && 
+            item.variant?._id === variantId &&
+            item.weightOption?._id === weightOptionId
               ? { ...item, quantity }
               : item
           );
@@ -172,15 +188,17 @@ export const useCartStore = create<CartStore>()(
 
       getTotalAmount: () => {
         return get().items.reduce((total, item) => {
-          const price = item.variant?.price ?? item.product.price;
+          const price = item.finalPrice ?? (item.variant?.price ?? item.product.price);
           return total + price * item.quantity;
         }, 0);
       },
 
-      getItemQuantity: (productId: string, variantId?: string) => {
+      getItemQuantity: (productId: string, variantId?: string, weightOptionId?: string) => {
         const item = get().items.find(
           (item) =>
-            item.product._id === productId && item.variant?._id === variantId
+            item.product._id === productId && 
+            item.variant?._id === variantId &&
+            item.weightOption?._id === weightOptionId
         );
         return item?.quantity ?? 0;
       },
