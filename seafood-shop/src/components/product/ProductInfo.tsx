@@ -11,14 +11,24 @@ import Button from '@/components/ui/Button';
 import QuantitySelector from './QuantitySelector';
 import VariantSelector from './VariantSelector';
 
+interface WeightOption {
+  _id?: string;
+  name: string;
+  weight: number;
+  priceMultiplier: number;
+}
+
 interface ProductInfoProps {
-  product: Product;
+  product: Product & { weightOptions?: WeightOption[] };
 }
 
 export default function ProductInfo({ product }: ProductInfoProps) {
   const router = useRouter();
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | undefined>(
     product.variants && product.variants.length > 0 ? product.variants[0] : undefined
+  );
+  const [selectedWeight, setSelectedWeight] = useState<WeightOption | undefined>(
+    product.weightOptions && product.weightOptions.length > 0 ? product.weightOptions[0] : undefined
   );
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
@@ -28,8 +38,14 @@ export default function ProductInfo({ product }: ProductInfoProps) {
   const addItem = useCartStore((state) => state.addItem);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
-  const currentPrice = selectedVariant?.price ?? product.price;
-  const originalPrice = selectedVariant?.originalPrice ?? product.originalPrice;
+  // Calculate price with weight multiplier
+  const basePrice = selectedVariant?.price ?? product.price;
+  const weightMultiplier = selectedWeight?.priceMultiplier ?? 1;
+  const currentPrice = basePrice * weightMultiplier;
+  
+  const baseOriginalPrice = selectedVariant?.originalPrice ?? product.originalPrice;
+  const originalPrice = baseOriginalPrice ? baseOriginalPrice * weightMultiplier : undefined;
+  
   const hasDiscount = product.discountPercent && product.discountPercent > 0;
   const isInStock = selectedVariant?.inStock ?? product.inStock;
 
@@ -106,6 +122,32 @@ export default function ProductInfo({ product }: ProductInfoProps) {
           selectedVariant={selectedVariant}
           onVariantSelect={setSelectedVariant}
         />
+      )}
+
+      {/* Weight Options */}
+      {product.weightOptions && product.weightOptions.length > 0 && (
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">
+            Chọn đơn vị:
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {product.weightOptions.map((weight) => (
+              <button
+                key={weight._id || weight.name}
+                onClick={() => setSelectedWeight(weight)}
+                className={`
+                  px-4 py-2 rounded-lg border-2 transition-all font-medium
+                  ${selectedWeight?._id === weight._id || selectedWeight?.name === weight.name
+                    ? 'border-primary bg-primary text-white'
+                    : 'border-gray-200 bg-white text-gray-700 hover:border-primary/50'
+                  }
+                `}
+              >
+                {weight.name}
+              </button>
+            ))}
+          </div>
+        </div>
       )}
 
       {/* Quantity */}

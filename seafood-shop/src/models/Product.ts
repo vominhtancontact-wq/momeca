@@ -8,6 +8,13 @@ export interface IProductVariant {
   inStock: boolean;
 }
 
+export interface IWeightOption {
+  _id?: string;
+  name: string; // "Nửa kí", "1 kí"
+  weight: number; // 0.5, 1
+  priceMultiplier: number; // 1 for base, 2 for double
+}
+
 export interface IProduct extends Document {
   name: string;
   slug: string;
@@ -18,6 +25,7 @@ export interface IProduct extends Document {
   images: string[];
   category: mongoose.Types.ObjectId;
   variants?: IProductVariant[];
+  weightOptions?: IWeightOption[]; // NEW: Weight options
   soldCount: number;
   inStock: boolean;
   tags?: string[];
@@ -34,6 +42,12 @@ const ProductVariantSchema = new Schema<IProductVariant>({
   price: { type: Number, required: true, min: 0 },
   originalPrice: { type: Number, min: 0 },
   inStock: { type: Boolean, default: true }
+}, { _id: true });
+
+const WeightOptionSchema = new Schema<IWeightOption>({
+  name: { type: String, required: true }, // "Nửa kí", "1 kí"
+  weight: { type: Number, required: true, min: 0 }, // 0.5, 1
+  priceMultiplier: { type: Number, required: true, min: 0, default: 1 } // 1, 2
 }, { _id: true });
 
 const ProductSchema = new Schema<IProduct>({
@@ -79,6 +93,7 @@ const ProductSchema = new Schema<IProduct>({
     required: [true, 'Danh mục sản phẩm là bắt buộc']
   },
   variants: [ProductVariantSchema],
+  weightOptions: [WeightOptionSchema], // NEW: Weight options
   soldCount: { 
     type: Number, 
     default: 0,
