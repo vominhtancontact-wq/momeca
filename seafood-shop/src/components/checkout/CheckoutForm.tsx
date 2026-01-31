@@ -134,6 +134,7 @@ export default function CheckoutForm() {
       const orderItems = items.map((item) => ({
         productId: item.product._id,
         variantId: item.variant?._id,
+        weightOptionId: item.weightOption?._id,
         quantity: item.quantity,
       }));
 

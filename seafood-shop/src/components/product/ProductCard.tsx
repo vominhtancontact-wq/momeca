@@ -43,7 +43,7 @@ export default function ProductCard({ product, showAddToCart = false }: ProductC
 
     // Thêm vào giỏ hàng (variant đầu tiên nếu có)
     const variant = product.variants && product.variants.length > 0 ? product.variants[0] : undefined;
-    addItem(product, variant, 1);
+    addItem(product, variant, undefined, 1);
 
     // Show notification
     setShowNotification(true);

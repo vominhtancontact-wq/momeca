@@ -6,6 +6,8 @@ export interface IOrderItem {
   productImage?: string;
   variant?: string;
   variantName?: string;
+  weightOption?: string;
+  weightOptionName?: string;
   quantity: number;
   price: number;
 }
@@ -55,6 +57,12 @@ const OrderItemSchema = new Schema<IOrderItem>({
   },
   variantName: { 
     type: String 
+  },
+  weightOption: {
+    type: String
+  },
+  weightOptionName: {
+    type: String
   },
   quantity: { 
     type: Number, 

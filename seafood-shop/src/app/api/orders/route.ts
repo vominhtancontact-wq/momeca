@@ -166,18 +166,34 @@ export async function POST(request: NextRequest) {
         }
       }
 
+      // Check if weight option is selected
+      let weightMultiplier = 1;
+      let weightOptionName = undefined;
+      if (item.weightOptionId && product.weightOptions) {
+        const weightOption = product.weightOptions.find(w => w._id?.toString() === item.weightOptionId);
+        if (weightOption) {
+          weightMultiplier = weightOption.priceMultiplier;
+          weightOptionName = weightOption.name;
+        }
+      }
+
+      // Apply weight multiplier to price
+      const finalPrice = price * weightMultiplier;
+
       const orderItem = {
         product: product._id,
         productName: product.name,
         productImage: product.images[0],
         variant: item.variantId,
         variantName,
+        weightOption: item.weightOptionId,
+        weightOptionName,
         quantity: item.quantity,
-        price
+        price: finalPrice
       };
 
       orderItems.push(orderItem);
-      subtotal += price * item.quantity;
+      subtotal += finalPrice * item.quantity;
 
       // Update sold count
       await Product.findByIdAndUpdate(product._id, {
