@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Order from '@/models/Order';
+import User from '@/models/User';
+import Coupon from '@/models/Coupon';
 import jwt from 'jsonwebtoken';
+import { getTierLevel, getCouponValueForTier } from '@/lib/tierSystem';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
@@ -75,6 +78,53 @@ export async function PATCH(
         { success: false, error: { message: 'Không tìm thấy đơn hàng' } },
         { status: 404 }
       );
+    }
+
+    // Nếu đơn hàng chuyển sang "delivered", cập nhật totalSpent và tier
+    if (status === 'delivered' && order.userId) {
+      console.log('Order delivered, updating user totalSpent and tier');
+      
+      const user = await User.findById(order.userId);
+      if (user) {
+        const oldTierLevel = user.tierLevel;
+        const newTotalSpent = user.totalSpent + order.totalAmount;
+        const newTierLevel = getTierLevel(newTotalSpent);
+        
+        user.totalSpent = newTotalSpent;
+        user.tierLevel = newTierLevel;
+        await user.save();
+        
+        console.log(`User ${user._id} totalSpent updated: ${user.totalSpent}, tier: ${user.tierLevel}`);
+        
+        // Nếu đạt tier mới, tạo coupon
+        if (newTierLevel > oldTierLevel && newTierLevel > 0) {
+          const couponValue = getCouponValueForTier(newTierLevel);
+          const tierNames: Record<number, string> = {
+            500000: 'BẠC',
+            1000000: 'VÀNG',
+            2000000: 'KIMCƯƠNG'
+          };
+          
+          const couponCode = `${tierNames[newTierLevel]}${Date.now().toString().slice(-6)}`;
+          const expiresAt = new Date();
+          expiresAt.setMonth(expiresAt.getMonth() + 3); // Hết hạn sau 3 tháng
+          
+          await Coupon.create({
+            code: couponCode,
+            type: 'fixed',
+            value: couponValue,
+            minOrderValue: 0,
+            maxUsage: 1,
+            usedCount: 0,
+            expiresAt,
+            status: 'active',
+            tierLevel: newTierLevel,
+            userId: user._id,
+          });
+          
+          console.log(`Created coupon ${couponCode} for user ${user._id} (tier ${newTierLevel})`);
+        }
+      }
     }
 
     console.log('Order updated successfully:', order._id);
