@@ -83,7 +83,8 @@ export default function OrderSummary() {
       {/* Items */}
       <div className="space-y-4 max-h-80 overflow-y-auto">
         {items.map((item, index) => {
-          const price = item.variant?.price ?? item.product.price;
+          // Use finalPrice if available (includes weight multiplier), otherwise fallback to variant/product price
+          const price = item.finalPrice ?? (item.variant?.price ?? item.product.price);
           return (
             <div
               key={`${item.product._id}-${item.variant?._id || index}`}
@@ -114,6 +115,9 @@ export default function OrderSummary() {
                 </p>
                 {item.variant && (
                   <p className="text-xs text-gray-500">{item.variant.name}</p>
+                )}
+                {item.weightOption && (
+                  <p className="text-xs text-gray-500">Đơn vị: {item.weightOption.name}</p>
                 )}
                 <p className="text-sm font-semibold text-primary mt-1">
                   {formatPrice(price * item.quantity)}

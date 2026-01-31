@@ -15,7 +15,8 @@ export default function CartSummary() {
   // Tính toán trực tiếp từ items
   const totalItems = items.reduce((total, item) => total + item.quantity, 0);
   const subtotal = items.reduce((total, item) => {
-    const price = item.variant?.price ?? item.product.price;
+    // Use finalPrice if available (includes weight multiplier), otherwise fallback to variant/product price
+    const price = item.finalPrice ?? (item.variant?.price ?? item.product.price);
     return total + price * item.quantity;
   }, 0);
   
