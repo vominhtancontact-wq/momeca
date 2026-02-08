@@ -70,17 +70,28 @@ export default function AccountPage() {
 
   const fetchOrders = async () => {
     try {
-      if (!user?.phone) {
-        console.log('No user phone found');
+      // Get token from zustand persisted storage
+      const authStorage = localStorage.getItem('auth-storage');
+      let token = null;
+      if (authStorage) {
+        const parsed = JSON.parse(authStorage);
+        token = parsed.state?.token;
+      }
+      
+      if (!token) {
+        console.log('No token found for fetching orders');
         setLoading(false);
         return;
       }
 
-      console.log('User phone:', user.phone);
-      console.log('Fetching orders for phone:', user.phone);
+      console.log('Token exists, fetching orders with token');
 
-      // Fetch orders by phone number (works for both old and new orders)
-      const res = await fetch(`/api/orders?phone=${encodeURIComponent(user.phone)}&limit=10`, {
+      // Fetch orders using token - let API handle the filtering
+      const res = await fetch(`/api/orders?limit=10`, {
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
         credentials: 'include'
       });
       
@@ -91,11 +102,6 @@ export default function AccountPage() {
       if (data.success) {
         setOrders(data.data);
         console.log('Orders loaded:', data.data.length);
-        
-        // Debug: log first order's phone if exists
-        if (data.data.length > 0) {
-          console.log('First order customerPhone:', data.data[0].customerPhone);
-        }
       } else {
         console.error('Failed to fetch orders:', data.error);
       }

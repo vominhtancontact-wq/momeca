@@ -33,6 +33,7 @@ export async function GET(request: NextRequest) {
     console.log('OrderNumber param:', orderNumber);
     
     let userId: string | null = null;
+    
     if (token) {
       try {
         const jwt = require('jsonwebtoken');
@@ -46,21 +47,13 @@ export async function GET(request: NextRequest) {
 
     const query: Record<string, unknown> = {};
     
-    // Priority 1: If userId exists, filter by userId OR phone (for backward compatibility)
+    // Priority 1: If userId exists, filter by userId only
     if (userId && !orderNumber) {
-      // For authenticated users, show orders by userId OR their phone
-      if (phone) {
-        query.$or = [
-          { userId: userId },
-          { customerPhone: phone }
-        ];
-        console.log('→ Filtering by userId OR phone');
-      } else {
-        query.userId = userId;
-        console.log('→ Filtering by userId only');
-      }
+      // For authenticated users, show orders by userId
+      query.userId = userId;
+      console.log('→ Filtering by userId:', userId);
     } 
-    // Priority 2: If phone provided (for order tracking or account page)
+    // Priority 2: If phone provided (for order tracking without login)
     else if (phone && !userId) {
       query.customerPhone = phone;
       console.log('→ Filtering by phone only:', phone);

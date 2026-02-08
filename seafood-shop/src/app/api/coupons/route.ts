@@ -26,11 +26,15 @@ export async function GET(request: NextRequest) {
 
     let decoded;
     try {
+      console.log('JWT_SECRET:', JWT_SECRET);
+      console.log('Token (first 20 chars):', token.substring(0, 20) + '...');
       decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
-    } catch (jwtError) {
-      console.log('JWT Error:', jwtError);
+      console.log('✓ Token verified successfully');
+    } catch (jwtError: any) {
+      console.log('✗ JWT Error:', jwtError.message);
+      console.log('Error name:', jwtError.name);
       return NextResponse.json(
-        { success: false, error: 'Token không hợp lệ' },
+        { success: false, error: `Token không hợp lệ: ${jwtError.message}` },
         { status: 401 }
       );
     }
