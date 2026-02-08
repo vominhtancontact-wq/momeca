@@ -27,7 +27,7 @@ async function checkOrders() {
     const User = mongoose.model('User', new mongoose.Schema({}, { strict: false }), 'users');
 
     // Get all orders
-    const orders = await Order.find({}).sort({ createdAt: -1 }).limit(10).lean() as Order[];
+    const orders = await Order.find({}).sort({ createdAt: -1 }).limit(10).lean() as any[];
     
     console.log('=== LAST 10 ORDERS ===\n');
     
