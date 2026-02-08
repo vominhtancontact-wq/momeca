@@ -17,8 +17,19 @@ export async function GET(request: NextRequest) {
     const orderNumber = searchParams.get('orderNumber');
 
     // Check if user is authenticated (for fetching their own orders)
-    const token = request.cookies.get('token')?.value || 
-                  request.headers.get('authorization')?.replace('Bearer ', '');
+    let token = request.cookies.get('token')?.value;
+    
+    // If no cookie, check Authorization header
+    if (!token) {
+      const authHeader = request.headers.get('authorization');
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.substring(7); // Remove 'Bearer ' prefix
+      }
+    }
+    
+    console.log('=== GET ORDERS DEBUG ===');
+    console.log('Token exists:', !!token);
+    console.log('Token from:', token ? (request.cookies.get('token') ? 'cookie' : 'header') : 'none');
     
     let userId: string | null = null;
     if (token) {
@@ -26,10 +37,12 @@ export async function GET(request: NextRequest) {
         const jwt = require('jsonwebtoken');
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         userId = decoded.userId;
-        console.log('User authenticated, userId:', userId);
-      } catch (error) {
-        console.log('Token verification failed in GET orders:', error);
+        console.log('✓ User authenticated, userId:', userId);
+      } catch (error: any) {
+        console.log('✗ Token verification failed:', error.message);
       }
+    } else {
+      console.log('✗ No token provided');
     }
 
     const query: Record<string, unknown> = {};
@@ -38,13 +51,17 @@ export async function GET(request: NextRequest) {
     // This ensures users only see their own orders
     if (userId) {
       query.userId = userId;
-      console.log('Filtering orders by userId:', userId);
+      console.log('→ Filtering orders by userId:', userId);
     } else if (phone) {
       // Only allow phone lookup if no userId (for order tracking page)
       query.customerPhone = phone;
+      console.log('→ Filtering orders by phone:', phone);
     } else if (orderNumber) {
       // Only allow orderNumber lookup if no userId (for order tracking page)
       query.orderNumber = orderNumber;
+      console.log('→ Filtering orders by orderNumber:', orderNumber);
+    } else {
+      console.log('→ No filter applied - will return all orders');
     }
     
     // Add status filter if provided
@@ -63,7 +80,9 @@ export async function GET(request: NextRequest) {
       Order.countDocuments(query)
     ]);
 
-    console.log('Found orders:', orders.length, 'for query:', query);
+    console.log('→ Found orders:', orders.length, 'Total:', total);
+    console.log('→ Query used:', JSON.stringify(query));
+    console.log('=== END DEBUG ===\n');
 
     return NextResponse.json({
       success: true,
