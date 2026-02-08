@@ -28,16 +28,16 @@ export default async function BestSellers() {
   const products = await getBestSellersData();
 
   return (
-    <section className="py-8 md:py-12 bg-cream">
-      <div className="container mx-auto px-4">
+    <section className="py-6 md:py-12 bg-cream">
+      <div className="container mx-auto px-3 md:px-4">
         {/* Section Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl md:text-2xl font-bold text-gray-900">
+        <div className="flex items-center justify-between mb-4 md:mb-6">
+          <h2 className="text-lg md:text-2xl font-bold text-gray-900">
             🔥 Hải Sản Bán Chạy
           </h2>
           <Link
             href="/san-pham?sort=popular"
-            className="text-primary hover:text-primary-dark font-medium text-sm md:text-base"
+            className="text-primary hover:text-primary-dark font-medium text-xs md:text-base"
           >
             Xem thêm →
           </Link>

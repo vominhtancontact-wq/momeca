@@ -26,6 +26,7 @@ export async function GET(request: NextRequest) {
         const jwt = require('jsonwebtoken');
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         userId = decoded.userId;
+        console.log('User authenticated, userId:', userId);
       } catch (error) {
         console.log('Token verification failed in GET orders:', error);
       }
@@ -33,14 +34,22 @@ export async function GET(request: NextRequest) {
 
     const query: Record<string, unknown> = {};
     
-    // If userId is present and no phone/orderNumber specified, fetch user's orders
-    if (userId && !phone && !orderNumber) {
+    // IMPORTANT: If userId is present, ALWAYS filter by userId (unless admin)
+    // This ensures users only see their own orders
+    if (userId) {
       query.userId = userId;
-    } else {
-      // Otherwise use phone or orderNumber for lookup
-      if (status) query.status = status;
-      if (phone) query.customerPhone = phone;
-      if (orderNumber) query.orderNumber = orderNumber;
+      console.log('Filtering orders by userId:', userId);
+    } else if (phone) {
+      // Only allow phone lookup if no userId (for order tracking page)
+      query.customerPhone = phone;
+    } else if (orderNumber) {
+      // Only allow orderNumber lookup if no userId (for order tracking page)
+      query.orderNumber = orderNumber;
+    }
+    
+    // Add status filter if provided
+    if (status) {
+      query.status = status;
     }
 
     const skip = (page - 1) * limit;
@@ -53,6 +62,8 @@ export async function GET(request: NextRequest) {
         .lean(),
       Order.countDocuments(query)
     ]);
+
+    console.log('Found orders:', orders.length, 'for query:', query);
 
     return NextResponse.json({
       success: true,

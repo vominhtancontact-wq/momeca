@@ -53,8 +53,8 @@ export default function Header() {
 
       {/* Main Header */}
       <div className="bg-cream/95 backdrop-blur-md shadow-sm border-b border-gray-100/50">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between gap-4">
+        <div className="container mx-auto px-3 md:px-4 py-2.5 md:py-3">
+          <div className="flex items-center justify-between gap-2 md:gap-4">
             {/* Mobile Menu Button */}
             <button
               className="lg:hidden p-2.5 -ml-2 text-primary hover:bg-primary/10 rounded-xl transition-all duration-300 active:scale-95"
@@ -68,9 +68,9 @@ export default function Header() {
 
             {/* Logo Section */}
             <Link href="/" className="flex-shrink-0 group">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 md:gap-3">
                 <div className="relative">
-                  <div className="w-14 h-14 md:w-16 md:h-16 rounded-full border-2 border-primary bg-cream p-0.5 shadow-md group-hover:shadow-lg transition-all duration-300">
+                  <div className="w-12 h-12 md:w-16 md:h-16 rounded-full border-2 border-primary bg-cream p-0.5 shadow-md group-hover:shadow-lg transition-all duration-300">
                     <img 
                       src="/images/logo.png" 
                       alt="Mỡ mê Cá" 
@@ -79,12 +79,12 @@ export default function Header() {
                   </div>
                 </div>
                 <div className="hidden sm:block">
-                  <h1 className="text-2xl md:text-3xl font-bold">
+                  <h1 className="text-xl md:text-3xl font-bold">
                     <span className="text-primary">Mỡ </span>
                     <span className="text-secondary">mê </span>
                     <span className="text-primary">Cá</span>
                   </h1>
-                  <p className="text-[10px] text-gray-400 tracking-widest uppercase">Hải sản tươi sống</p>
+                  <p className="text-[9px] md:text-[10px] text-gray-400 tracking-widest uppercase">Hải sản tươi sống</p>
                 </div>
               </div>
             </Link>
@@ -113,7 +113,7 @@ export default function Header() {
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-2 md:gap-3">
+            <div className="flex items-center gap-1.5 md:gap-3">
               {/* User Auth */}
               {mounted && (
                 isAuthenticated && user ? (
@@ -157,13 +157,13 @@ export default function Header() {
               {/* Cart */}
               <Link
                 href="/gio-hang"
-                className="relative p-3.5 bg-gradient-to-br from-primary to-primary-dark hover:from-primary-dark hover:to-primary text-white rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-primary/30 group/cart active:scale-95"
+                className="relative p-2.5 md:p-3.5 bg-gradient-to-br from-primary to-primary-dark hover:from-primary-dark hover:to-primary text-white rounded-xl md:rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-primary/30 group/cart active:scale-95"
               >
-                <svg className="w-6 h-6 group-hover/cart:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 md:w-6 md:h-6 group-hover/cart:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
                 {mounted && totalItems > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-gradient-to-br from-secondary to-red-600 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-lg animate-scale-in">
+                  <span className="absolute -top-1 -right-1 bg-gradient-to-br from-secondary to-red-600 text-white text-[10px] md:text-xs font-bold rounded-full w-5 h-5 md:w-6 md:h-6 flex items-center justify-center shadow-lg animate-scale-in">
                     {totalItems > 99 ? '99+' : totalItems}
                   </span>
                 )}
@@ -172,7 +172,7 @@ export default function Header() {
           </div>
 
           {/* Search Bar - Mobile */}
-          <div className="md:hidden mt-3">
+          <div className="md:hidden mt-2.5">
             <SearchBar />
           </div>
         </div>
