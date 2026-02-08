@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import dbConnect from '@/lib/db';
 import Product from '@/models/Product';
 import '@/models/Category'; // Required for populate
@@ -86,6 +87,17 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const product = await Product.create(body);
+    
+    // Populate category
+    await product.populate('category', 'name slug');
+
+    // Revalidate các trang liên quan
+    revalidatePath('/san-pham');
+    revalidatePath('/');
+    
+    if (product.category && typeof product.category === 'object' && 'slug' in product.category) {
+      revalidatePath(`/danh-muc/${product.category.slug}`);
+    }
 
     return NextResponse.json({
       success: true,

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import dbConnect from '@/lib/db';
 import Product from '@/models/Product';
 import '@/models/Category'; // Required for populate
@@ -79,6 +80,16 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     
     console.log('Updated product:', product.name, 'price:', product.price);
 
+    // Revalidate các trang liên quan để xóa cache
+    revalidatePath('/san-pham');
+    revalidatePath(`/san-pham/${product.slug}`);
+    revalidatePath('/');
+    
+    // Revalidate category page nếu có
+    if (product.category && typeof product.category === 'object' && 'slug' in product.category) {
+      revalidatePath(`/danh-muc/${product.category.slug}`);
+    }
+
     return NextResponse.json({
       success: true,
       data: product
@@ -103,13 +114,29 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     await dbConnect();
     const { id } = await params;
 
-    const product = await Product.findByIdAndDelete(id);
+    const product = await Product.findById(id).populate('category', 'slug');
 
     if (!product) {
       return NextResponse.json(
         { success: false, error: { message: 'Không tìm thấy sản phẩm' } },
         { status: 404 }
       );
+    }
+
+    const productSlug = product.slug;
+    const categorySlug = product.category && typeof product.category === 'object' && 'slug' in product.category 
+      ? product.category.slug 
+      : null;
+
+    await Product.findByIdAndDelete(id);
+
+    // Revalidate các trang liên quan
+    revalidatePath('/san-pham');
+    revalidatePath(`/san-pham/${productSlug}`);
+    revalidatePath('/');
+    
+    if (categorySlug) {
+      revalidatePath(`/danh-muc/${categorySlug}`);
     }
 
     return NextResponse.json({
