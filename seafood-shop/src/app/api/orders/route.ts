@@ -29,7 +29,8 @@ export async function GET(request: NextRequest) {
     
     console.log('=== GET ORDERS DEBUG ===');
     console.log('Token exists:', !!token);
-    console.log('Token from:', token ? (request.cookies.get('token') ? 'cookie' : 'header') : 'none');
+    console.log('Phone param:', phone);
+    console.log('OrderNumber param:', orderNumber);
     
     let userId: string | null = null;
     if (token) {
@@ -41,27 +42,42 @@ export async function GET(request: NextRequest) {
       } catch (error: any) {
         console.log('✗ Token verification failed:', error.message);
       }
-    } else {
-      console.log('✗ No token provided');
     }
 
     const query: Record<string, unknown> = {};
     
-    // IMPORTANT: If userId is present, ALWAYS filter by userId (unless admin)
-    // This ensures users only see their own orders
-    if (userId) {
-      query.userId = userId;
-      console.log('→ Filtering orders by userId:', userId);
-    } else if (phone) {
-      // Only allow phone lookup if no userId (for order tracking page)
+    // Priority 1: If userId exists, filter by userId OR phone (for backward compatibility)
+    if (userId && !orderNumber) {
+      // For authenticated users, show orders by userId OR their phone
+      if (phone) {
+        query.$or = [
+          { userId: userId },
+          { customerPhone: phone }
+        ];
+        console.log('→ Filtering by userId OR phone');
+      } else {
+        query.userId = userId;
+        console.log('→ Filtering by userId only');
+      }
+    } 
+    // Priority 2: If phone provided (for order tracking or account page)
+    else if (phone && !userId) {
       query.customerPhone = phone;
-      console.log('→ Filtering orders by phone:', phone);
-    } else if (orderNumber) {
-      // Only allow orderNumber lookup if no userId (for order tracking page)
+      console.log('→ Filtering by phone only:', phone);
+    } 
+    // Priority 3: If orderNumber provided (for order tracking)
+    else if (orderNumber) {
       query.orderNumber = orderNumber;
-      console.log('→ Filtering orders by orderNumber:', orderNumber);
-    } else {
-      console.log('→ No filter applied - will return all orders');
+      console.log('→ Filtering by orderNumber:', orderNumber);
+    } 
+    // No filter - return empty (security)
+    else {
+      console.log('→ No valid filter - returning empty');
+      return NextResponse.json({
+        success: true,
+        data: [],
+        pagination: { total: 0, page, limit, totalPages: 0 }
+      });
     }
     
     // Add status filter if provided
