@@ -84,6 +84,8 @@ export default function AccountPage() {
         return;
       }
 
+      console.log('Fetching orders with token:', token ? 'exists' : 'missing');
+
       // Fetch orders using userId from token (more reliable than phone)
       const res = await fetch(`/api/orders?limit=10`, {
         headers: { 
@@ -94,8 +96,13 @@ export default function AccountPage() {
       });
       
       const data = await res.json();
+      console.log('Orders API response:', data);
+      
       if (data.success) {
         setOrders(data.data);
+        console.log('Orders loaded:', data.data.length);
+      } else {
+        console.error('Failed to fetch orders:', data.error);
       }
     } catch (error) {
       console.error('Error fetching orders:', error);
