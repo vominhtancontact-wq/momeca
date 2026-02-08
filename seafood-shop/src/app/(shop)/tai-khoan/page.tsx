@@ -76,6 +76,7 @@ export default function AccountPage() {
         return;
       }
 
+      console.log('User phone:', user.phone);
       console.log('Fetching orders for phone:', user.phone);
 
       // Fetch orders by phone number (works for both old and new orders)
@@ -85,10 +86,16 @@ export default function AccountPage() {
       
       const data = await res.json();
       console.log('Orders API response:', data);
+      console.log('Orders found:', data.data?.length || 0);
       
       if (data.success) {
         setOrders(data.data);
         console.log('Orders loaded:', data.data.length);
+        
+        // Debug: log first order's phone if exists
+        if (data.data.length > 0) {
+          console.log('First order customerPhone:', data.data[0].customerPhone);
+        }
       } else {
         console.error('Failed to fetch orders:', data.error);
       }
